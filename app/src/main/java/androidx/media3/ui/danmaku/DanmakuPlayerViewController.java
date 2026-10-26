@@ -4,14 +4,13 @@ import androidx.media3.ui.PlayerView;
 
 import okhttp3.OkHttpClient;
 
-
 public class DanmakuPlayerViewController {
 	public Object getItems(Object p0) { return null; }
 	public boolean bind(PlayerView p0) { return false; }
 	public void setOkHttpClient(OkHttpClient p0) { }
 	public void setEnabled(boolean p0) { }
 	public void setConfig(DanmakuConfig p0) { }
-	public void setDataSource(android.net.Uri uri) { }
+	public void setDataSource(Object p0) { }
 	public Object sendNow(String p0) { return null; }
 	public void close(Object p0) { }
 }

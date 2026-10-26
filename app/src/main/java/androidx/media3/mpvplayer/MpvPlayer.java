@@ -18,7 +18,7 @@ import androidx.media3.exoplayer.DecoderMode;
 
 public abstract class MpvPlayer extends DiscMenuController implements Player {
 
-    public static boolean isAvailable() { return false; }
+    public boolean isAvailable(Object p0) { return false; }
 
     public static final int VIDEO_EFFECTS_SUPPORTED = 0;
     public static final int VIDEO_EFFECTS_UNSUPPORTED_DRM = 1;
@@ -28,13 +28,13 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public static final int AUDIO_EFFECTS_SUPPORTED = 0;
     public static final int AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH = 1;
 
-    public int getVideoEffectsSupport() { return VIDEO_EFFECTS_UNSUPPORTED_RENDERER; }
-    public int getAudioEffectsSupport() { return AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH; }
-    public boolean isVideoSharpnessSupported() { return false; }
-    public void setVideoEqualizer(Object equalizer) { }
-    public void setAudioFilter(Object filter) { }
-    public void setSubtitleContentLoader(Object loader) { }
-    public void setSubtitleOptions(androidx.media3.mpvplayer.MpvSubtitleOptions options) { }
+    public Object getVideoEffectsSupport(Object p0) { return VIDEO_EFFECTS_UNSUPPORTED_RENDERER; }
+    public Object getAudioEffectsSupport(Object p0) { return AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH; }
+    public boolean isVideoSharpnessSupported(Object p0) { return false; }
+    public void setVideoEqualizer(Object p0) { }
+    public void setAudioFilter(MpvAudioFilter p0) { }
+    public void setSubtitleContentLoader(SubtitleFileContent p0) { }
+    public void setSubtitleOptions(MpvSubtitleOptions p0) { }
 
     public static class Builder {
         public Builder setVulkanEnabled(boolean b) { return this; }
@@ -74,31 +74,42 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public interface AudioOutputListener { void onAudioOutputApplied(); }
     public interface AudioFilterListener { void onAudioFilterApplied(); }
 
-    public void setLogListener(int level, LogListener listener) { }
-    public boolean loadScript(String path, ScriptLoadListener listener) { return false; }
-    public void unloadScript(long clientId) { }
-    public boolean setStartupScripts(java.util.List<java.io.File> scripts) { return false; }
-    public String getScriptData(String key) { return null; }
-    public String getInputBindings() { return null; }
-    public boolean runScriptBinding(String binding) { return false; }
-    public void setAudioOutputListener(AudioOutputListener listener) { }
-    public void setAudioFilterListener(AudioFilterListener listener) { }
-    public void setVerboseLoggingEnabled(boolean enabled) { }
-    public int getAudioChannelCount() { return 0; }
-    public SubtitleSelectionState getSubtitleSelectionState() { return null; }
-    public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride selection) { return null; }
-    public SubtitleOffsets getSubtitleOffsets() { return null; }
-    public void setSubtitleOffsets(SubtitleOffsets offsets) { }
-    public void setSubtitleContentEnabled(boolean enabled) { }
-    public boolean canRetrySubtitleContent(Format format) { return false; }
-    public void retrySubtitleContent(Format format) { }
-    public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride selection) { }
-    public void setSecondaryTextTrackAutoSelectionEnabled(boolean enabled) { }
-    public void resetSecondaryTextTrackSelection() { }
-    public boolean addSubtitle(MediaItem item) { return false; }
-    public DecoderMode getVideoDecoderMode() { return null; }
+    public void setLogListener(int p0, Object p1) { }
+    public Object unloadScript(long p0) { }
+    public void setStartupScripts(Object p0) { return false; }
+    public String getScriptData(String p0) { return null; }
+    public Object getInputBindings(Object p0) { return null; }
+    public Object runScriptBinding(String p0) { return false; }
+    public void setAudioOutputListener(Object p0) { }
+    public void setAudioFilterListener(Object p0) { }
+    public void setVerboseLoggingEnabled(boolean p0) { }
+    public Object getAudioChannelCount(Object p0) { return 0; }
+    public Object getSubtitleSelectionState(Object p0) { return null; }
+    public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride p0) { return null; }
+    public SubtitleOffsets getSubtitleOffsets(Object p0) { return null; }
+    public void setSubtitleOffsets(SubtitleOffsets p0) { }
+    public void setSubtitleContentEnabled(boolean p0) { }
+    public boolean canRetrySubtitleContent(Format p0) { return false; }
+    public Object retrySubtitleContent(Format p0) { }
+    public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride p0) { }
+    public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
+    public void resetSecondaryTextTrackSelection(Object p0) { }
+    public void addSubtitle(SubtitleConfiguration p0) { return false; }
+    public Object getVideoDecoderMode(Object p0) { return null; }
     public void setVideoDecoderMode(DecoderMode mode) { }
-    public void setDiscDataSourceFactory(DataSource.Factory factory) { }
-    public void setMediaItem(MediaItem item, long startPositionMs) { }
+    public void setDiscDataSourceFactory(Factory p0) { }
+    public void setMediaItem(MediaItem p0, long p1) { }
     public Uri getLocalConfigurationUri() { return null; }
+	public Object getApplicationLooper(Object p0) { }
+	public void addListener(Listener p0) { }
+	public void removeListener(MpvPlayerEngine p0) { }
+	public void release(Object p0) { }
+	public Object getCurrentMediaItem(Object p0) { }
+	public Object getPlaybackState(Object p0) { }
+	public void stop(Object p0) { }
+	public Object getTrackSelectionParameters(Object p0) { }
+
+	public static Object VIDEO_EFFECTS_UNSUPPORTED_DIRECT_DOLBY_VISION_OUTPUT;
+
+	public Object loadScript(String p0, Object p1) { }
 }

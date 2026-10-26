@@ -1,12 +1,14 @@
-// 洛视频补齐桩：替代上游私有 aar 中的 media3 fork 类（docs/S0-立项报告.md 第 9 节）。自动生成。
+// @hand 洛视频补齐桩：替代上游私有 aar 中的 media3 fork 类（docs/S0-立项报告.md 第 9 节）。手工维护。
 package androidx.media3.common;
 
-
 public class VideoTransform {
-	public Object MAX_SCALE;
-	public Object DEFAULT;
-	public Object scaleX;
-	public Object scaleY;
-	public Object panX;
-	public Object panY;
+
+    public static final VideoTransform DEFAULT = new VideoTransform();
+    public static final float MAX_SCALE = 5f;
+
+    public float scaleX = 1f, scaleY = 1f, panX, panY;
+
+	public static Object scaleX;
+	public static Object scaleY;
+	public static Object panX;
 }

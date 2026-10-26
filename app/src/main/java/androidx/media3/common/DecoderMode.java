@@ -14,5 +14,7 @@ public class DecoderMode {
 
     public String name() { return name; }
 
+    public androidx.media3.exoplayer.DecoderMode toExoDecoderMode() { return androidx.media3.exoplayer.DecoderMode.AUTO; }
+
     public static DecoderMode[] values() { return new DecoderMode[]{AUTO, HARDWARE, SOFTWARE, FFMPEG}; }
 }

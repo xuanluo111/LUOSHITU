@@ -2,7 +2,6 @@
 package androidx.media3.exoplayer.audio;
 import androidx.media3.common.audio.AudioEffectParameters;
 
-
 public class AudioEqualizerController {
 	public void apply(ExoPlayer p0, AudioEffectParameters p1) { }
 	public void release(Object p0) { }

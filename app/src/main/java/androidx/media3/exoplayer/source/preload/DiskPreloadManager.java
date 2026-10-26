@@ -25,6 +25,8 @@ public class DiskPreloadManager {
     }
 
     public boolean preload(Object mediaItem) { return false; }
-    public void release() { }
+    public void start(ExoPlayer p0, MediaItem p1, Options p2) { }
+    public void stop(Object p0) { }
+    public void release(Object p0) { }
     public void cancel() { }
 }

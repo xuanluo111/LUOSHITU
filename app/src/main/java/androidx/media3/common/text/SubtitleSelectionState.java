@@ -23,6 +23,8 @@ public class SubtitleSelectionState {
 
     public static final SubtitleSelectionState EMPTY = new SubtitleSelectionState();
 
-    public boolean isPrimary(TrackSelectionOverride override) { return false; }
-    public boolean isActiveSecondary(TrackSelectionOverride override) { return false; }
+    public boolean isPrimary(TrackSelectionOverride p0) { return false; }
+    public boolean isActiveSecondary(TrackSelectionOverride p0) { return false; }
+
+	public static Object activeSecondarySelection;
 }

@@ -15,4 +15,9 @@ public class DiscMenuState {
     public int availability = AVAILABILITY_UNAVAILABLE;
     public int phase = PHASE_IDLE;
     public boolean navigationPlaybackOngoing;
+
+	public static Object availability;
+
+	public static Object phase;
+
 }

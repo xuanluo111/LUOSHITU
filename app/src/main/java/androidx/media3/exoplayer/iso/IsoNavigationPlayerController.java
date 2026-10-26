@@ -4,8 +4,9 @@ import com.fongmi.android.tv.App;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.datasource.DataSource;
 
-
 public class IsoNavigationPlayerController {
+    public IsoNavigationPlayerController(ExoPlayer player) { }
+    public Object getPlayer(Object p0) { return null; }
 	public Object getPlayer(Object p0) { return null; }
 	public void close(Object p0) { }
 	public void prepareMediaSource(App p0, MediaSource p1, Factory p2) { }

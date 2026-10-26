@@ -1,6 +1,8 @@
 // @hand 洛视频补齐桩：替代上游私有 aar 中的 media3 fork 类（docs/S0-立项报告.md 第 9 节）。手工维护。
 // libass 字幕渲染会话：本产品字幕走内置渲染，桩恒为不可用。
 package androidx.media3.exoplayer.libass;
+
+import androidx.media3.exoplayer.Renderer;
 import androidx.media3.extractor.DefaultExtractorsFactory;
 
 import androidx.media3.common.MediaItem;
@@ -16,11 +18,18 @@ public class LibassPlaybackSession {
         public androidx.media3.extractor.SubtitleParser.Factory subtitleParserFactory;
     }
 
-    public static boolean isAvailable() { return false; }
+    public boolean isAvailable(Object p0) { return false; }
+
+    public void setPreloadMediaItem(Object p0) { }
+    public void close(Object p0) { }
+    public Object createClockRenderer(Object p0) { return null; }
+    public void setBottomPositionFraction(float p0) { }
+    public void setSecondaryBottomPositionFraction(float p0) { }
+    public void setFontScale(float p0, boolean p1) { }
 
     public SubtitleTranscript forMediaItem(MediaItem mediaItem) { return null; }
 
-    public MediaComponents createMediaComponents(MediaItem mediaItem, ExtractorsFactory extractorsFactory, SubtitleTranscript transcript) {
+    public MediaComponents createMediaComponents(MediaItem p0, ExtractorsFactory p1, SubtitleTranscript p2) {
         return new MediaComponents();
     }
 

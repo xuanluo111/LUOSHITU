@@ -9,7 +9,13 @@ STATE = os.path.join(ROOT, 'build/stubstate.json')
 
 def load_state():
     raw = json.load(open(STATE)) if os.path.exists(STATE) else {}
-    return {k: v for k, v in raw.items() if k.startswith('androidx.media3.')}
+    out = {}
+    for k, v in raw.items():
+        if not k.startswith('androidx.media3.'): continue
+        f = os.path.join(STUB, *k.split('.')) + '.java'
+        if os.path.exists(f) and '@hand' in open(f, encoding='utf-8', errors='replace').read(2048): continue
+        out[k] = v
+    return out
 
 def save_state(s):
     os.makedirs(os.path.dirname(STATE), exist_ok=True)
@@ -31,7 +37,7 @@ def clean_params(params):
     fixed = []
     for a in out:
         a = a.strip().replace('<空值>', 'Object').replace('<null>', 'Object')
-        if not a or '[' in a or '<' in a or '(' in a: a = 'Object'
+        if not a or '[' in a or '<' in a or '(' in a or '?' in a or '::' in a: a = 'Object'
         fixed.append(a)
     return ', '.join(a for a in fixed if a)
 
@@ -234,7 +240,8 @@ def main():
         if not fqn: continue
         info = state.get(fqn)
         if not info: continue
-        newp = clean_params('(' + found + ')')
+        if '没有参数' in found or 'no arguments' in found: newp = ''
+        else: newp = clean_params('(' + found + ')')
         cands = [mm for mm in info['methods'] if mm['name'] == mname]
         if cands:
             cands[0]['params'] = newp
@@ -267,7 +274,22 @@ def main():
         state.setdefault(pkg + '.' + name, {'pkg': pkg, 'name': name, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
 
     save_state(state)
-    for key, info in state.items(): gen_file(info['pkg'], info['name'], info)
+    for key, info in state.items():
+        gen_file(info['pkg'], info['name'], info)
+        path2 = os.path.join(STUB, *info['pkg'].split('.'), info['name'] + '.java')
+        if '@hand' in open(path2, encoding='utf-8', errors='replace').read(2048):
+            content = open(path2, encoding='utf-8').read()
+            changed = False
+            for meth in info.get('methods', []):
+                pat = re.compile(r'public (?:static )?\w+[\w.<>\[\], ]* ' + re.escape(meth['name']) + r'\([^)]*\)')
+                sig = 'public ' + ('static ' if meth.get('static') else '') + meth['ret'] + ' ' + meth['name'] + '(' + named(meth['params']) + ')'
+                new = pat.sub(sig, content)
+                if new != content: content, changed = new, True
+                elif sig not in content and not pat.search(content):
+                    content = content.replace('\n}\n', '\n\t' + sig + ' { }\n}\n')
+                    changed = True
+
+            if changed: open(path2, 'w', encoding='utf-8').write(content)
     json.dump({k: sorted(v) for k, v in unresolved.items()}, open(os.path.join(ROOT, 'build/unresolved.json'), 'w'), ensure_ascii=False, indent=1)
     print(f'stubs total={len(state)} unresolved={ {k: len(v) for k, v in unresolved.items()} }')
 

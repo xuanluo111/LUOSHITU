@@ -7,4 +7,5 @@ public class DolbyVisionOutputPolicy {
     public static final int ASSUME_UNSUPPORTED = 1;
 
     public @interface Mode { }
+
 }

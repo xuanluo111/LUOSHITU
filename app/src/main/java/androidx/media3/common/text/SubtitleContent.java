@@ -12,10 +12,7 @@ public class SubtitleContent {
     public static final SubtitleContent PARTIAL = new SubtitleContent();
     public static final SubtitleContent TRUNCATED = new SubtitleContent();
 
-    public static class State {
-        public static final int LOADING = 0;
-        public static final int COMPLETE = 1;
-    }
+    public enum State { LOADING, COMPLETE, ERROR, UNSUPPORTED, PARTIAL, TRUNCATED }
 
     public static class Entry {
         public String image;
@@ -28,4 +25,7 @@ public class SubtitleContent {
     public List<Entry> entries = Collections.emptyList();
 
     public boolean isEmpty() { return entries.isEmpty(); }
+
+	public static Object state;
+	public static Object entries;
 }

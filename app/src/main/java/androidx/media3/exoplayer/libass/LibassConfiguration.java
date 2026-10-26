@@ -6,6 +6,11 @@ public class LibassConfiguration {
     public static class Builder {
         public Builder setFontConfig(String path) { return this; }
         public Builder setFontFile(Object file) { return this; }
+        public Builder setFontsDirectory(String dir) { return this; }
+        public Builder setMaximumBitmapCacheSizeMb(int mb) { return this; }
+        public Builder setMaximumGlyphCount(int count) { return this; }
+        public Builder setMaximumRenderPixels(long pixels) { return this; }
+        public Builder setDefaultFontFamily(String family) { return this; }
         public LibassConfiguration build() { return new LibassConfiguration(); }
     }
 }
