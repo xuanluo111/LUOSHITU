@@ -2,6 +2,13 @@
 
 Android TV、手機、平板都能用，支援本地檔案與網址播放。
 
+## 洛视频二开基线（S0 锁定）
+
+- 上游：https://github.com/FongMi/TV 分支 `fongmi`，GPL-3.0。
+- 锁定 commit：`23fbfdfc01e8c003eca396f60f6916e354803307`（2026-10-26），此后我方改动基于此，随上游更新须逐一评估。
+- 本仓库用途：适老化影音 App「洛视频」（家属预置、老人零设置），mobile flavor 二开。
+- S0 文档：[docs/S0-立项报告.md](docs/S0-立项报告.md) · [docs/S0-需求代码映射表.md](docs/S0-需求代码映射表.md)。
+
 [使用指南](https://fongmi.github.io/TV) · [討論群組](https://t.me/fongmi_official)
 
 ## 主要功能
