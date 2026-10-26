@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 洛视频适老化设计令牌：全项目统一引用，禁止散写魔法数（提示词第 6 部分）。
+     对比度均按白底 (#FFFFFF) 计算，达标线 WCAG AAA ≥7:1。 -->
+<resources>
+
+    <!-- 颜色：固定浅色高对比，不做深色模式 -->
+    <color name="elder_background">#FFFFFF</color>
+    <color name="elder_surface">#FFFFFF</color>
+    <color name="elder_text_primary">#111111</color>      <!-- 19.0:1 -->
+    <color name="elder_text_secondary">#3C3C3C</color>    <!-- 10.4:1 -->
+    <color name="elder_text_tertiary">#595959</color>     <!-- 7.0:1，最浅可用 -->
+    <color name="elder_primary">#0A3D91</color>           <!-- 主操作，10.9:1 -->
+    <color name="elder_on_primary">#FFFFFF</color>
+    <color name="elder_primary_pressed">#DCE6F7</color>
+    <color name="elder_danger">#A61B1B</color>            <!-- 8.0:1 -->
+    <color name="elder_success">#14591F</color>           <!-- 8.7:1 -->
+    <color name="elder_banner_bg">#FFF8E1</color>         <!-- 常驻提示条底色，配 elder_text_primary -->
+    <color name="elder_card_stroke">#C9C9C9</color>       <!-- 非信息性描边，可低于 7:1 -->
+    <color name="elder_divider">#D9D9D9</color>
+    <color name="elder_scrim">#33000000</color>
+
+    <!-- 字号下限：正文 20 / 列表主标题 22 / 页面主标题 24 / 频道名·求助·继续看片名 28 -->
+    <dimen name="elder_font_body">20sp</dimen>
+    <dimen name="elder_font_list_title">22sp</dimen>
+    <dimen name="elder_font_page_title">24sp</dimen>
+    <dimen name="elder_font_channel">28sp</dimen>
+    <dimen name="elder_font_hero">32sp</dimen>
+
+    <!-- 触摸目标与间距：目标 ≥64dp、主操作/常驻悬浮 ≥72dp、相邻间距 ≥16dp -->
+    <dimen name="elder_touch">64dp</dimen>
+    <dimen name="elder_touch_main">72dp</dimen>
+    <dimen name="elder_gap">16dp</dimen>
+    <dimen name="elder_gap_small">8dp</dimen>
+    <dimen name="elder_corner">16dp</dimen>
+    <dimen name="elder_button_height">64dp</dimen>
+    <dimen name="elder_card_min_height">88dp</dimen>
+    <dimen name="elder_banner_min_height">56dp</dimen>
+    <dimen name="elder_fab_size">72dp</dimen>
+    <dimen name="elder_poster_min_width">120dp</dimen>
+    <dimen name="elder_list_row_min_height">96dp</dimen>
+    <dimen name="elder_search_box_height">64dp</dimen>
+    <dimen name="elder_seek_bar_touch">16dp</dimen>
+
+</resources>

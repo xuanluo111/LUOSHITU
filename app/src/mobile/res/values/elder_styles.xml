@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 适老化主题：固定浅色、高对比，禁用夜间；组件一律直接引用 elder_tokens 令牌色，
+         不依赖 Material 动态取色，保证任意机型观感一致。 -->
+    <style name="Theme.Elder" parent="Theme.App">
+        <item name="android:windowBackground">@color/elder_background</item>
+        <item name="android:textColorPrimary">@color/elder_text_primary</item>
+        <item name="android:textColorSecondary">@color/elder_text_secondary</item>
+        <item name="android:statusBarColor">@color/elder_background</item>
+        <item name="android:navigationBarColor">@color/elder_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- 主按钮：单击生效、高度 64dp、字号 22sp -->
+    <style name="ElderButton" parent="Widget.Material3.Button">
+        <item name="android:layout_height">@dimen/elder_button_height</item>
+        <item name="android:minHeight">@dimen/elder_button_height</item>
+        <item name="android:minWidth">@dimen/elder_touch_main</item>
+        <item name="android:textSize">@dimen/elder_font_list_title</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/elder_on_primary</item>
+        <item name="backgroundTint">@color/elder_primary</item>
+        <item name="cornerRadius">@dimen/elder_corner</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <!-- 次按钮：白底描边，用于非主操作 -->
+    <style name="ElderButton.Secondary" parent="ElderButton">
+        <item name="android:textColor">@color/elder_primary</item>
+        <item name="backgroundTint">@color/elder_surface</item>
+        <item name="strokeColor">@color/elder_card_stroke</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <!-- 危险按钮：仅限"清空全部历史"等唯一不可逆操作 -->
+    <style name="ElderButton.Danger" parent="ElderButton">
+        <item name="backgroundTint">@color/elder_danger</item>
+    </style>
+
+    <!-- 大卡片：占满行宽、最小高 88dp -->
+    <style name="ElderCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="android:minHeight">@dimen/elder_card_min_height</item>
+        <item name="cardCornerRadius">@dimen/elder_corner</item>
+        <item name="cardBackgroundColor">@color/elder_surface</item>
+        <item name="strokeColor">@color/elder_card_stroke</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- 常驻提示条：承载关键信息，不用自动消失的 Toast -->
+    <style name="ElderBanner">
+        <item name="android:minHeight">@dimen/elder_banner_min_height</item>
+        <item name="android:background">@color/elder_banner_bg</item>
+        <item name="android:textColor">@color/elder_text_primary</item>
+        <item name="android:textSize">@dimen/elder_font_body</item>
+        <item name="android:padding">@dimen/elder_gap</item>
+    </style>
+
+</resources>
