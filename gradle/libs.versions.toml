@@ -111,7 +111,10 @@ textdrawable = { group = "com.github.jahirfiquitiva", name = "TextDrawable", ver
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxingCore" }
 
+kotlin = "2.4.21"
+
 [plugins]
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 chaquo-python = { id = "com.chaquo.python", version.ref = "python" }

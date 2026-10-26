@@ -56,6 +56,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+# 洛视频：我方单测纳入版本管理（覆盖上游 **/src/test*/ 规则，仅限 app 模块我方包路径）
+!app/src/test/
+!app/src/test/**
+
 .DS_Store
 Thumbs.db
 Desktop.ini

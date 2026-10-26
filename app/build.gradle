@@ -3,6 +3,7 @@ import com.fongmi.gradle.AbiApkPackaging
 
 plugins {
     alias libs.plugins.android.application
+    alias libs.plugins.kotlin.android
 }
 
 def localProps = new Properties()
@@ -94,6 +95,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
+
+    kotlinOptions {
+        jvmTarget = '21'
+    }
 }
 
 AbiApkPackaging.configure(project, SingleArtifact.APK.INSTANCE)
@@ -133,6 +138,7 @@ dependencies {
     annotationProcessor libs.eventbus.annotation.processor
     annotationProcessor libs.glide.compiler
     coreLibraryDesugaring libs.desugar
+    testImplementation libs.junit
 }
 
 if (file('test.gradle').isFile()) apply from: 'test.gradle'
