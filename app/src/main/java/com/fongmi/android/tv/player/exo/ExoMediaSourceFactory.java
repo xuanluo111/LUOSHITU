@@ -162,6 +162,6 @@ public class ExoMediaSourceFactory implements MediaSource.Factory {
     }
 
     static DefaultExtractorsFactory createDefaultExtractorsFactory() {
-        return new DefaultExtractorsFactory().setTsExtractorTimestampSearchBytes(TsExtractor.DEFAULT_TIMESTAMP_SEARCH_BYTES * 10).setMatroskaExtractorFlagsForHttpSources(MatroskaExtractor.FLAG_DEFER_SEEK_FOR_CUES);
+        return new DefaultExtractorsFactory().setTsExtractorTimestampSearchBytes(TsExtractor.DEFAULT_TIMESTAMP_SEARCH_BYTES * 10);
     }
 }

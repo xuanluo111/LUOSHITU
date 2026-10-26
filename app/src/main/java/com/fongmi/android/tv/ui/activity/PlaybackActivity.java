@@ -1,5 +1,8 @@
 package com.fongmi.android.tv.ui.activity;
 
+
+
+
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -31,6 +34,7 @@ import androidx.media3.common.DiscMenuState;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
+import androidx.media3.fork.MediaFork;
 import androidx.media3.common.VideoSize;
 import androidx.media3.session.MediaController;
 import androidx.media3.ui.PlayerSeekView;
@@ -126,7 +130,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     }
 
     private DiscMenuState discMenuState() {
-        return discMenu() != null ? player().getPlayer().getDiscMenuState() : DiscMenuState.EMPTY;
+        return discMenu() != null ? MediaFork.getDiscMenuState(player().getPlayer()) : DiscMenuState.EMPTY;
     }
 
     protected boolean hasDiscMenu() {
@@ -1043,8 +1047,8 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
             if (pendingResume != null && (mService == null || !pendingResume.matches(player().getPlayer()))) pendingResume = null;
         }
         if (events.containsAny(Player.EVENT_TIMELINE_CHANGED, Player.EVENT_POSITION_DISCONTINUITY, Player.EVENT_MEDIA_ITEM_TRANSITION, Player.EVENT_PLAYBACK_STATE_CHANGED, Player.EVENT_AVAILABLE_COMMANDS_CHANGED)) updateKeyIncrement();
-        if (isPlaybackCurrent() && !isWebPlaybackActive() && events.containsAny(Player.EVENT_PLAYBACK_STATE_CHANGED, Player.EVENT_DISC_MENU_STATE_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION)) {
-            boolean ended = player.getPlaybackState() == Player.STATE_ENDED && !player.getDiscMenuState().navigationPlaybackOngoing;
+        if (isPlaybackCurrent() && !isWebPlaybackActive() && events.containsAny(Player.EVENT_PLAYBACK_STATE_CHANGED, MediaFork.EVENT_DISC_MENU_STATE_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION)) {
+            boolean ended = player.getPlaybackState() == Player.STATE_ENDED && !MediaFork.getDiscMenuState(player).navigationPlaybackOngoing;
             if (!ended) {
                 playbackEndHandled = false;
             } else if (!playbackEndHandled) {

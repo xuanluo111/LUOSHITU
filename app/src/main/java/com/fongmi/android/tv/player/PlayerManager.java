@@ -1,5 +1,7 @@
 package com.fongmi.android.tv.player;
 
+
+
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,6 +20,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
+import androidx.media3.fork.MediaFork;
 import androidx.media3.common.Timeline;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
@@ -164,7 +167,7 @@ public class PlayerManager implements ParseCallback {
     }
 
     public boolean isDiscMenuAvailable() {
-        return !isEmpty() && player.getDiscMenuState().availability == DiscMenuState.AVAILABILITY_AVAILABLE;
+        return !isEmpty() && MediaFork.getDiscMenuState(player).availability == DiscMenuState.AVAILABILITY_AVAILABLE;
     }
 
     public boolean runMpvScript(MpvScripts.Item item) {
@@ -203,11 +206,11 @@ public class PlayerManager implements ParseCallback {
     }
 
     public List<MediaChapter> getCurrentMediaChapters() {
-        return player.getCurrentMediaChapters();
+        return MediaFork.getCurrentMediaChapters(player);
     }
 
     public List<MediaEdition> getCurrentMediaEditions() {
-        return player.getCurrentMediaEditions();
+        return MediaFork.getCurrentMediaEditions(player);
     }
 
     public MediaItem getCurrentMediaItem() {
@@ -283,7 +286,7 @@ public class PlayerManager implements ParseCallback {
     }
 
     public boolean canPreloadNext() {
-        return PreloadSetting.isEnabled() && PreloadSetting.isNextEpisodeEnabled() && engine != null && engine.getType() == PlayerEngine.Type.EXO && !player.isCurrentMediaItemLive() && !player.getDiscMenuState().navigationPlaybackOngoing && (spec == null || !IsoDiscPreparation.isIso(MediaItemFactory.from(spec)));
+        return PreloadSetting.isEnabled() && PreloadSetting.isNextEpisodeEnabled() && engine != null && engine.getType() == PlayerEngine.Type.EXO && !player.isCurrentMediaItemLive() && !MediaFork.getDiscMenuState(player).navigationPlaybackOngoing && (spec == null || !IsoDiscPreparation.isIso(MediaItemFactory.from(spec)));
     }
 
     public boolean isPortrait() {
@@ -451,11 +454,11 @@ public class PlayerManager implements ParseCallback {
     }
 
     public boolean selectChapter(MediaChapter chapter) {
-        return player.selectChapter(chapter);
+        return MediaFork.selectChapter(player, chapter);
     }
 
     public void selectEdition(MediaEdition edition) {
-        player.selectEdition(edition);
+        MediaFork.selectEdition(player, edition);
     }
 
     public void setDanmakuConfig(DanmakuConfig config) {
@@ -665,11 +668,11 @@ public class PlayerManager implements ParseCallback {
     }
 
     public long getTextOffsetMs() {
-        return player.isCommandAvailable(Player.COMMAND_GET_TEXT_OFFSET) ? player.getTextOffsetMs() : 0;
+        return player.isCommandAvailable(MediaFork.COMMAND_GET_TEXT_OFFSET) ? MediaFork.getTextOffsetMs(player) : 0;
     }
 
     public void setTextOffsetMs(long offsetMs) {
-        if (player.isCommandAvailable(Player.COMMAND_SET_TEXT_OFFSET)) player.setTextOffsetMs(offsetMs);
+        if (player.isCommandAvailable(MediaFork.COMMAND_SET_TEXT_OFFSET)) MediaFork.setTextOffsetMs(player, offsetMs);
     }
 
     public SubtitleOffsets getSubtitleOffsets() {
@@ -685,11 +688,11 @@ public class PlayerManager implements ParseCallback {
     }
 
     public long getAudioOffsetMs() {
-        return player.isCommandAvailable(Player.COMMAND_GET_AUDIO_OFFSET) ? player.getAudioOffsetMs() : 0;
+        return player.isCommandAvailable(MediaFork.COMMAND_GET_AUDIO_OFFSET) ? MediaFork.getAudioOffsetMs(player) : 0;
     }
 
     public void setAudioOffsetMs(long offsetMs) {
-        if (player.isCommandAvailable(Player.COMMAND_SET_AUDIO_OFFSET)) player.setAudioOffsetMs(offsetMs);
+        if (player.isCommandAvailable(MediaFork.COMMAND_SET_AUDIO_OFFSET)) MediaFork.setAudioOffsetMs(player, offsetMs);
     }
 
     public void reset() {
@@ -1079,8 +1082,8 @@ public class PlayerManager implements ParseCallback {
         private static PlaybackSnapshot capture(PlayerManager manager) {
             Player player = manager.player;
             float volume = player.isCommandAvailable(Player.COMMAND_GET_VOLUME) ? player.getVolume() : Float.NaN;
-            long audioOffsetMs = player.isCommandAvailable(Player.COMMAND_GET_AUDIO_OFFSET) ? player.getAudioOffsetMs() : C.TIME_UNSET;
-            SubtitleOffsets offsets = player.isCommandAvailable(Player.COMMAND_GET_TEXT_OFFSET) ? manager.getSubtitleOffsets() : null;
+            long audioOffsetMs = player.isCommandAvailable(MediaFork.COMMAND_GET_AUDIO_OFFSET) ? MediaFork.getAudioOffsetMs(player) : C.TIME_UNSET;
+            SubtitleOffsets offsets = player.isCommandAvailable(MediaFork.COMMAND_GET_TEXT_OFFSET) ? manager.getSubtitleOffsets() : null;
             int repeatMode = player.getRepeatMode();
             int selectedIsoEditionIndex = getSelectedIsoEditionIndex(manager, player);
             return new PlaybackSnapshot(manager.getPosition(), player.getPlayWhenReady(), player.getPlaybackParameters(), repeatMode, volume, audioOffsetMs, offsets, selectedIsoEditionIndex);
@@ -1089,7 +1092,7 @@ public class PlayerManager implements ParseCallback {
         private static int getSelectedIsoEditionIndex(PlayerManager manager, Player player) {
             int selectedIsoEditionIndex = C.INDEX_UNSET;
             if (manager.spec != null && IsoDiscPreparation.isIso(MediaItemFactory.from(manager.spec))) {
-                for (MediaEdition edition : player.getCurrentMediaEditions()) {
+                for (MediaEdition edition : MediaFork.getCurrentMediaEditions(player)) {
                     if (edition.selected) {
                         selectedIsoEditionIndex = edition.index;
                         break;
@@ -1104,8 +1107,8 @@ public class PlayerManager implements ParseCallback {
             if (player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH)) player.setPlaybackParameters(playbackParameters);
             if (player.isCommandAvailable(Player.COMMAND_SET_REPEAT_MODE)) player.setRepeatMode(repeatMode);
             if (!Float.isNaN(volume) && player.isCommandAvailable(Player.COMMAND_SET_VOLUME)) player.setVolume(volume);
-            if (audioOffsetMs != C.TIME_UNSET && player.isCommandAvailable(Player.COMMAND_SET_AUDIO_OFFSET)) player.setAudioOffsetMs(audioOffsetMs);
-            if (subtitleOffsets != null && player.isCommandAvailable(Player.COMMAND_SET_TEXT_OFFSET)) {
+            if (audioOffsetMs != C.TIME_UNSET && player.isCommandAvailable(MediaFork.COMMAND_SET_AUDIO_OFFSET)) MediaFork.setAudioOffsetMs(player, audioOffsetMs);
+            if (subtitleOffsets != null && player.isCommandAvailable(MediaFork.COMMAND_SET_TEXT_OFFSET)) {
                 if (manager.supportsSubtitleOffsets()) manager.setSubtitleOffsets(subtitleOffsets);
                 else player.setTextOffsetMs(subtitleOffsets.primaryMs);
             }

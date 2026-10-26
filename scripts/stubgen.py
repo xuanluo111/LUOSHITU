@@ -67,10 +67,18 @@ def gen_file(pkg, cls, info):
         elif ret == 'long': body.append(f'\tpublic long {name}({ps}) {{ return 0L; }}\n')
         else: body.append(f'\tpublic {ret} {name}({ps}) {{ return null; }}\n')
     header = '// 洛视频补齐桩：替代上游私有 aar 中的 media3 fork 类（docs/S0-立项报告.md 第 9 节）。自动生成。\n'
-    content = header + f'package {pkg};\n\npublic class {cls} {{\n' + ''.join(body)
+    old_imports = []
+    if os.path.exists(path):
+        try:
+            for l in open(path, encoding='utf-8'):
+                if l.startswith('import '): old_imports.append(l)
+        except Exception: pass
+    content = header + f'package {pkg};\n\n' + ''.join(old_imports) + '\npublic class {cls} {{\n'.format(cls=cls) + ''.join(body)
     for n in info.get('nested', []): content += f'\tpublic static class {n} {{ }}\n'
     content += '}\n'
     open(path, 'w').write(content)
+
+OFFICIAL = {'R', 'PlayerView', 'MatroskaExtractor', 'DefaultExtractorsFactory', 'SubtitleView', 'CaptionStyleCompat', 'TimeBar', 'AspectRatioFrameLayout', 'MediaItem', 'Player', 'ExoPlayer'}
 
 def main():
     text = open(LOG, encoding='utf-8', errors='replace').read()
@@ -130,6 +138,7 @@ def main():
             lm = re.search(r'类 ([\w.]+)|class ([\w.]+)|类型为 ?([\w.<>]*)的(?:局部)?变量 ([\w.]+)', loc)
             tgt = (lm.group(1) or lm.group(2) or lm.group(3)) if lm else None
             fqn = stub_names.get(tgt) if tgt else None
+            if fqn and fqn.rsplit('.',1)[-1] in OFFICIAL: fqn = None
             if fqn:
                 pkg, cls = fqn.rsplit('.', 1)
                 info = state.setdefault(fqn, {'pkg': pkg, 'name': cls, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
@@ -139,8 +148,8 @@ def main():
             elif tgt:
                 unresolved.setdefault(tgt, set()).add(name + params)
         elif kind in ('变量', 'variable'):
-            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)', loc)
-            tgt = (lm.group(1) or lm.group(2)) if lm else None
+            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)|类型为 ?([\w.<>]*)的(?:局部|记录组件)? ?变量 ([\w.]+)|记录组件 ([\w.]+)', loc)
+            tgt = (lm.group(1) or lm.group(2) or lm.group(3) or lm.group(5)) if lm else None
             fqn = stub_names.get(tgt) if tgt else None
             if fqn:
                 pkg, cls = fqn.rsplit('.', 1)
@@ -184,6 +193,64 @@ def main():
             for meth in info.get('methods', []):
                 if meth['ret'] == 'Object' and meth['name'] in srcline:
                     meth['ret'] = want
+
+    try: seeds = json.load(open(os.path.join(ROOT, 'build/classmap.json')))
+    except Exception: seeds = {}
+    # Pass: 桩文件补 import（符号为类且错误文件是桩）
+    imp_map = {}
+    for base in ('app/src', 'catvod/src'):
+        for dirpath, _, files in os.walk(os.path.join(ROOT, base)):
+            for fn in files:
+                if fn.endswith('.java'):
+                    try:
+                        for im in open(os.path.join(dirpath, fn), encoding='utf-8', errors='replace'):
+                            m2 = re.match(r'import ([\w.]+)\.(\w+);', im.strip())
+                            if m2 and not m2.group(1).startswith('java.lang'):
+                                imp_map.setdefault(m2.group(2), m2.group(1))
+                    except Exception: pass
+    for k2, v2 in seeds.items(): imp_map.setdefault(k2, v2)
+    def fix_import(fpath, fqn, simple):
+        if not fqn.rsplit('.', 1)[-1][:1].isupper(): return  # 禁止插入包名 import
+        try: content = open(fpath, encoding='utf-8').read()
+        except Exception: return
+        if 'import ' + fqn + ';' in content: return
+        lines = content.split('\n')
+        for i, l in enumerate(lines):
+            if l.startswith('package '):
+                lines.insert(i + 1, '\nimport ' + fqn + ';')
+                open(fpath, 'w', encoding='utf-8').write('\n'.join(lines))
+                return
+    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 找不到符号\n(?:.*\n)*?\s*符号: +类 ([\w.]+)\n\s*位置: +类 ([\w.]+)', text):
+        fpath, cls_name = m.group(1), m.group(2)
+        simple = cls_name.rsplit('.', 1)[-1]
+        fqn = imp_map.get(simple)
+        if fqn and '.' in fqn:
+            fix_import(fpath.split(':')[0], fqn, simple)
+
+    # Pass: 参数类型按调用点修正（无法将类 X 中的方法 y 应用到给定类型 → 需要/发现）
+    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 无法将类 ([\w.]+)中的方法 (\w+)应用到给定类型\n(?:.*\n)*?\s*发现: +([^\n]+)', text):
+        tgt, mname, found = m.group(2), m.group(3), m.group(4).strip()
+        fqn = stub_names.get(tgt)
+        if not fqn: continue
+        info = state.get(fqn)
+        if not info: continue
+        newp = clean_params('(' + found + ')')
+        cands = [mm for mm in info['methods'] if mm['name'] == mname]
+        if cands:
+            cands[0]['params'] = newp
+            for extra in cands[1:]: info['methods'].remove(extra)
+        else:
+            info['methods'].append({'name': mname, 'params': newp, 'ret': default_ret(mname)})
+
+    # Pass: 静态上下文字段修正
+    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 无法从静态上下文中引用非静态 变量 (\w+)\n\s*位置: +类 ([\w.]+)', text):
+        fname, tgt = m.group(2), m.group(3)
+        fqn = stub_names.get(tgt)
+        if fqn and fqn in state:
+            info = state[fqn]
+            if fname in info.get('fields', []):
+                info['fields'] = [f for f in info['fields'] if f != fname] + [fname]
+                info['staticfields'] = info.get('staticfields', []) + [fname]
 
     for line in open(os.path.join(ROOT, 'build/harvest_imports.txt')):
         line = line.strip()

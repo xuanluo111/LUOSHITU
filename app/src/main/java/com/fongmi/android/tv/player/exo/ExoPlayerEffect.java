@@ -1,5 +1,7 @@
 package com.fongmi.android.tv.player.exo;
 
+import androidx.media3.fork.MediaFork;
+
 import androidx.media3.common.Format;
 import androidx.media3.common.audio.AudioEffectParameters;
 import androidx.media3.common.audio.AudioProcessor;
@@ -46,16 +48,16 @@ public final class ExoPlayerEffect implements PlayerEffect {
 
     @Override
     public boolean supportsVideoEffect() {
-        return player.getVideoEffectsSupport() == ExoPlayer.VIDEO_EFFECTS_SUPPORTED;
+        return MediaFork.getVideoEffectsSupport(player) == MediaFork.VIDEO_EFFECTS_SUPPORTED;
     }
 
     @Override
     public int getVideoEffectError() {
-        return switch (player.getVideoEffectsSupport()) {
-            case ExoPlayer.VIDEO_EFFECTS_SUPPORTED -> 0;
-            case ExoPlayer.VIDEO_EFFECTS_UNSUPPORTED_DRM -> R.string.error_video_effect_drm;
-            case ExoPlayer.VIDEO_EFFECTS_UNSUPPORTED_RENDERER -> R.string.error_video_effect_decode;
-            case ExoPlayer.VIDEO_EFFECTS_UNSUPPORTED_TUNNELING -> R.string.error_video_effect_tunnel;
+        return switch (MediaFork.getVideoEffectsSupport(player)) {
+            case MediaFork.VIDEO_EFFECTS_SUPPORTED -> 0;
+            case MediaFork.VIDEO_EFFECTS_UNSUPPORTED_DRM -> R.string.error_video_effect_drm;
+            case MediaFork.VIDEO_EFFECTS_UNSUPPORTED_RENDERER -> R.string.error_video_effect_decode;
+            case MediaFork.VIDEO_EFFECTS_UNSUPPORTED_TUNNELING -> R.string.error_video_effect_tunnel;
             default -> R.string.error_video_effect_unsupported;
         };
     }
@@ -75,7 +77,7 @@ public final class ExoPlayerEffect implements PlayerEffect {
 
     @Override
     public boolean supportsAudioEffect() {
-        return player.getAudioProcessingSupport() == ExoPlayer.AUDIO_PROCESSING_SUPPORTED && !audioEffectFailed;
+        return MediaFork.getAudioProcessingSupport(player) == MediaFork.AUDIO_PROCESSING_SUPPORTED && !audioEffectFailed;
     }
 
     @Override
@@ -85,16 +87,16 @@ public final class ExoPlayerEffect implements PlayerEffect {
 
     @Override
     public int getAudioEffectError() {
-        return switch (player.getAudioProcessingSupport()) {
-            case ExoPlayer.AUDIO_PROCESSING_SUPPORTED -> audioEffectFailed ? R.string.error_audio_effect_apply : 0;
-            case ExoPlayer.AUDIO_PROCESSING_UNSUPPORTED_PASSTHROUGH -> R.string.error_audio_effect_passthrough;
+        return switch (MediaFork.getAudioProcessingSupport(player)) {
+            case MediaFork.AUDIO_PROCESSING_SUPPORTED -> audioEffectFailed ? R.string.error_audio_effect_apply : 0;
+            case MediaFork.AUDIO_PROCESSING_UNSUPPORTED_PASSTHROUGH -> R.string.error_audio_effect_passthrough;
             default -> R.string.error_audio_effect_unsupported;
         };
     }
 
     @Override
     public void applyAudioEffect() {
-        boolean support = player.getAudioProcessingSupport() == ExoPlayer.AUDIO_PROCESSING_SUPPORTED;
+        boolean support = MediaFork.getAudioProcessingSupport(player) == MediaFork.AUDIO_PROCESSING_SUPPORTED;
         if (support) applyAudioConfig(getAudioChannelCount());
         else clearAudioEffect();
     }
@@ -113,7 +115,7 @@ public final class ExoPlayerEffect implements PlayerEffect {
 
     @Override
     public boolean supportsSkipSilence() {
-        return player.isSkipSilenceSupported();
+        return MediaFork.isSkipSilenceSupported(player);
     }
 
     @Override

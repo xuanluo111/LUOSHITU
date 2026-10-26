@@ -1,5 +1,8 @@
 package com.fongmi.android.tv.player.exo;
 
+import androidx.media3.fork.MediaFork;
+
+
 import androidx.media3.common.C;
 import androidx.media3.common.MediaChapter;
 import androidx.media3.common.Player;
@@ -119,7 +122,7 @@ public final class ExoCommand {
     private static Result executeOffset(PlayerManager manager, Player player, Parsed parsed) {
         boolean subtitle = parsed.property.equals("sub-delay");
         if (subtitle && !manager.supportsSubtitleOffsets()) return Result.UNAVAILABLE;
-        if (!subtitle && (!player.isCommandAvailable(Player.COMMAND_SET_AUDIO_OFFSET) || (parsed.mode.equals("add") || parsed.values != null) && !player.isCommandAvailable(Player.COMMAND_GET_AUDIO_OFFSET))) return Result.UNAVAILABLE;
+        if (!subtitle && (!player.isCommandAvailable(MediaFork.COMMAND_SET_AUDIO_OFFSET) || (parsed.mode.equals("add") || parsed.values != null) && !player.isCommandAvailable(MediaFork.COMMAND_GET_AUDIO_OFFSET))) return Result.UNAVAILABLE;
         SubtitleOffsets subtitles = subtitle ? manager.getSubtitleOffsets() : null;
         long currentOffsetMs = 0;
         if (parsed.mode.equals("add") || parsed.values != null) currentOffsetMs = subtitle ? subtitles.primaryMs : manager.getAudioOffsetMs();
