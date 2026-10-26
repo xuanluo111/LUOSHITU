@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 仅 debug 构建存在的冒烟入口；release APK 不含此 Activity（S1 冒烟闸门工具） -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.luoshitu.video.smoke.SmokeActivity"
+            android:exported="true"
+            android:label="洛视频冒烟（debug）">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
