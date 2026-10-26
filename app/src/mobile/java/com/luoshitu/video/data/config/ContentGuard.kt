@@ -97,8 +97,12 @@ object ContentGuard {
         else Verdict.Reject(ElderError.NotConfigFormat("内容既不是 JSON 也不是 TXT 多仓格式"), record)
     }
 
-    private fun ByteArray.firstNonWhitespaceOrNull(): Char? =
-        this.firstOrNull { !it.isWhitespace() }?.toChar()
+    private fun ByteArray.firstNonWhitespaceOrNull(): Char? {
+        for (b in this) {
+            if (b != 0x20.toByte() && b != 0x09.toByte() && b != 0x0A.toByte() && b != 0x0D.toByte()) return b.toInt().toChar()
+        }
+        return null
+    }
 
     fun md5(bytes: ByteArray): String =
         MessageDigest.getInstance("MD5").digest(bytes).joinToString("") { "%02x".format(it) }
