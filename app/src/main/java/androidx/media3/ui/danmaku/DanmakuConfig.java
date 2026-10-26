@@ -2,4 +2,14 @@
 package androidx.media3.ui.danmaku;
 
 public class DanmakuConfig {
+	public Object STYLE_SHADOW;
+	public Object STYLE_STROKE;
+	public Object STYLE_PROJECTION;
+	public Object COLOR_MODE_DEFAULT;
+	public Object STYLE_NONE;
+	public Object COLOR_MODE_COLORFUL;
+	public Object COLOR_MODE_GRADIENT;
+	public Object timeOffsetMs;
+	public Object DEFAULT;
+	public static class Builder { }
 }

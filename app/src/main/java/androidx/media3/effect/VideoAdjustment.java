@@ -2,4 +2,5 @@
 package androidx.media3.effect;
 
 public class VideoAdjustment {
+	public static class Builder { }
 }

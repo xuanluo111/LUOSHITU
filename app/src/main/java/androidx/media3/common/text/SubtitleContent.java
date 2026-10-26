@@ -3,6 +3,7 @@ package androidx.media3.common.text;
 
 public class SubtitleContent {
 	public Object UNSUPPORTED;
+	public Object LOADING;
 	public static class Entry { }
 	public static class State { }
 }

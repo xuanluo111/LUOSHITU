@@ -2,4 +2,19 @@
 package androidx.media3.common.audio;
 
 public class AudioEffectParameters {
+	public Object DEFAULT;
+	public boolean isCenterGainAvailable(int p0) { return false; }
+	public boolean hasEffect(Object p0) { return false; }
+	public boolean hasBands(Object p0) { return false; }
+	public Object getChannelMode(Object p0) { return null; }
+	public Object getBalance(Object p0) { return null; }
+	public boolean isLoudnessEnabled(Object p0) { return false; }
+	public Object getBoostMillibels(Object p0) { return null; }
+	public Object getPreampMillibels(Object p0) { return null; }
+	public Object getEqualizerLevelsMillibels(Object p0) { return null; }
+	public boolean shouldLimitOutput(int p0) { return false; }
+	public boolean hasCenterGain(int p0) { return false; }
+	public Object getCenterGainFactor(Object p0) { return null; }
+	public Object getStability(Object p0) { return null; }
+	public static class Builder { }
 }

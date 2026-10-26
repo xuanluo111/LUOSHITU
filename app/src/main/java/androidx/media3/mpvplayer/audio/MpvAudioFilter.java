@@ -2,5 +2,6 @@
 package androidx.media3.mpvplayer.audio;
 
 public class MpvAudioFilter {
+	public Object EMPTY;
 	public static class Builder { }
 }

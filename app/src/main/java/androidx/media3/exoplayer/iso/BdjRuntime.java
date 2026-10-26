@@ -2,4 +2,8 @@
 package androidx.media3.exoplayer.iso;
 
 public class BdjRuntime {
+	public void prepare(Application p0, CancellationSignal p1) { }
+	public Object getStatus(Application p0) { return null; }
+	public static class Application { }
+	public static class CancellationSignal { }
 }

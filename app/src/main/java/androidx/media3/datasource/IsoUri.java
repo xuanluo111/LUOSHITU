@@ -2,4 +2,6 @@
 package androidx.media3.datasource;
 
 public class IsoUri {
+	public Object withEditionIndex(Uri p0, int p1) { return null; }
+	public static class Uri { }
 }

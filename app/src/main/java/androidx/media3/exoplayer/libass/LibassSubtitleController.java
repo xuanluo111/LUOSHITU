@@ -2,4 +2,8 @@
 package androidx.media3.exoplayer.libass;
 
 public class LibassSubtitleController {
+	public void close(Object p0) { }
+	public Object getSubtitleSelectionState(Object p0) { return null; }
+	public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride p0) { }
+	public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
 }

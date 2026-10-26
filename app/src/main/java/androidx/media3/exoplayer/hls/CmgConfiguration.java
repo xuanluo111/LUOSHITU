@@ -2,4 +2,6 @@
 package androidx.media3.exoplayer.hls;
 
 public class CmgConfiguration {
+	public Object fromMediaUri(Uri p0) { return null; }
+	public static class Uri { }
 }

@@ -8,7 +8,8 @@ STUB = os.path.join(ROOT, 'app/src/main/java')
 STATE = os.path.join(ROOT, 'build/stubstate.json')
 
 def load_state():
-    return json.load(open(STATE)) if os.path.exists(STATE) else {}
+    raw = json.load(open(STATE)) if os.path.exists(STATE) else {}
+    return {k: v for k, v in raw.items() if k.startswith('androidx.media3.')}
 
 def save_state(s):
     os.makedirs(os.path.dirname(STATE), exist_ok=True)
@@ -47,7 +48,12 @@ def named(params):
     return ', '.join(out)
 
 def gen_file(pkg, cls, info):
+    if not (pkg == 'androidx.media3' or pkg.startswith('androidx.media3.')):
+        return  # 硬防护：禁止写入 androidx.media3 以外的任何路径
     path = os.path.join(STUB, *pkg.split('.'), cls + '.java')
+    path = os.path.join(STUB, *pkg.split('.'), cls + '.java')
+    if os.path.exists(path) and ('@hand' in open(path, encoding='utf-8', errors='replace').read(2048) or '手工维护' in open(path, encoding='utf-8', errors='replace').read(2048)):
+        return  # 手工维护的桩不覆盖
     os.makedirs(os.path.dirname(path), exist_ok=True)
     body = []
     for c in info.get('ctors', []): body.append('\t' + c + ' { }\n')
@@ -91,7 +97,9 @@ def main():
             if fn.endswith('.java'):
                 rel = os.path.relpath(os.path.join(dirpath, fn), STUB)
                 parts = rel[:-5].split(os.sep)
-                stub_names[parts[-1]] = '.'.join(parts[:-1]) + '.' + parts[-1]
+                fqn = '.'.join(parts[:-1]) + '.' + parts[-1]
+                stub_names[parts[-1]] = fqn
+                stub_names[fqn] = fqn
     unresolved = {}
 
     blocks = re.findall(r'([^\s:]+\.java):(\d+): (?:错误|error): 找不到符号\n(?:.*\n)*?\s*符号: +(\S+) ?([^\n]*)\n\s*位置: ([^\n]*)', text)
@@ -119,8 +127,8 @@ def main():
         elif kind in ('方法', 'method'):
             name = detail.strip().split('(')[0]
             params = detail.strip()[len(name):].strip()
-            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)', loc)
-            tgt = (lm.group(1) or lm.group(2)) if lm else None
+            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)|类型为 ?([\w.<>]*)的(?:局部)?变量 ([\w.]+)', loc)
+            tgt = (lm.group(1) or lm.group(2) or lm.group(3)) if lm else None
             fqn = stub_names.get(tgt) if tgt else None
             if fqn:
                 pkg, cls = fqn.rsplit('.', 1)
@@ -151,6 +159,31 @@ def main():
                 if sig not in info['ctors']: info['ctors'].append(sig)
             elif tgt:
                 unresolved.setdefault(tgt, set()).add('ctor ' + detail.strip())
+
+    # 返回类型修正：从"不兼容的类型: Object无法转换为 X"与 '==' 操作数错误反推
+    import re as _re
+    text_lines = text.split('\n')
+    def ret_fix(match_type, fpath, lineno):
+        try: srcline = text_lines[int(lineno) - 1] if fpath.startswith('/') else ''
+        except Exception: return None
+        idx = srcline.find(match_type)  # 定位失败则全行找
+        return srcline
+    for m in _re.finditer(r'([^\s:]+\.java):(\d+): (?:错误|error): 不兼容的类型: ?Object无法转换为 ?([\w.<>\[\], ]+)', text):
+        fpath, lineno, want = m.group(1), m.group(2), m.group(3).strip()
+        try: srcline = open(fpath.split(':')[0], encoding='utf-8', errors='replace').read().split('\n')[int(lineno) - 1]
+        except Exception: continue
+        for key, info in state.items():
+            for meth in info.get('methods', []):
+                if meth['ret'] == 'Object' and meth['name'] in srcline:
+                    meth['ret'] = want
+    for m in _re.finditer(r'([^\s:]+\.java):(\d+): (?:错误|error): 二元运算符 [^\n]*?第二个类型: ([\w.<>\[\], ]+)', text):
+        fpath, lineno, want = m.group(1), m.group(2), m.group(3).strip()
+        try: srcline = open(fpath.split(':')[0], encoding='utf-8', errors='replace').read().split('\n')[int(lineno) - 1]
+        except Exception: continue
+        for key, info in state.items():
+            for meth in info.get('methods', []):
+                if meth['ret'] == 'Object' and meth['name'] in srcline:
+                    meth['ret'] = want
 
     for line in open(os.path.join(ROOT, 'build/harvest_imports.txt')):
         line = line.strip()

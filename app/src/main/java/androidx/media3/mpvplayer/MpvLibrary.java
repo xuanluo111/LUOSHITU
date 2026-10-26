@@ -2,4 +2,5 @@
 package androidx.media3.mpvplayer;
 
 public class MpvLibrary {
+	public void setLibraryLoader(Object p0) { }
 }

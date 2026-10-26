@@ -2,4 +2,15 @@
 package androidx.media3.exoplayer.text;
 
 public class SubtitleTranscriptSession {
+	public Object getContent(Format p0, Object p1) { return null; }
+	public void setContentEnabled(boolean p0) { }
+	public boolean canRetryContent(Format p0) { return false; }
+	public Object retryContent(Format p0) { return null; }
+	public void setLoader(SubtitleFileContent p0) { }
+	public void setPlayer(ExoPlayer p0) { }
+	public void setPreloadMediaItem(MediaItem p0) { }
+	public void setPreloadMediaItem(Object p0) { }
+	public void close(Object p0) { }
+	public Object forMediaItem(MediaItem p0) { return null; }
+	public static class Format { }
 }

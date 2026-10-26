@@ -2,4 +2,6 @@
 package androidx.media3.mpvplayer;
 
 public class MpvDecoderMode {
+	public Object AUTO;
+	public DecoderMode fromCommonDecoderMode(DecoderMode p0) { return null; }
 }

@@ -2,4 +2,5 @@
 package androidx.media3.datasource.okhttp;
 
 public class OkHttpDataSource {
+	public static class Factory { }
 }

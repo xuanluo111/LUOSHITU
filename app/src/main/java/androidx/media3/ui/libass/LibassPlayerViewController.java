@@ -2,4 +2,8 @@
 package androidx.media3.ui.libass;
 
 public class LibassPlayerViewController {
+	public void close(Object p0) { }
+	public boolean bind(PlayerView p0) { return false; }
+	public void setStyleOverride(Object p0, String p1) { }
+	public void setSecondarySubtitleViewConfigurator(Object p0) { }
 }

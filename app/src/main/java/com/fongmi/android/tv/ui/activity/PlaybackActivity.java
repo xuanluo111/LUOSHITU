@@ -35,6 +35,7 @@ import androidx.media3.common.VideoSize;
 import androidx.media3.session.MediaController;
 import androidx.media3.ui.PlayerSeekView;
 import androidx.media3.ui.PlayerView;
+import androidx.media3.ui.PlayerViewFork;
 import androidx.media3.ui.SubtitleView;
 import androidx.media3.ui.TimeBar;
 import androidx.media3.ui.danmaku.Danmaku;
@@ -223,7 +224,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
         View surface = getPlayerView().getVideoSurfaceView();
         if (surface == null || surface.getWidth() <= 0 || surface.getHeight() <= 0) return true;
         if (event.getActionMasked() == MotionEvent.ACTION_UP && event.getEventTime() - event.getDownTime() >= ViewConfiguration.getLongPressTimeout()) onDiscMenuLongPress();
-        else if (event.getActionMasked() == MotionEvent.ACTION_DOWN || event.getActionMasked() == MotionEvent.ACTION_MOVE || event.getActionMasked() == MotionEvent.ACTION_UP) getPlayerView().dispatchDiscMenuTouchEvent(event);
+        else if (event.getActionMasked() == MotionEvent.ACTION_DOWN || event.getActionMasked() == MotionEvent.ACTION_MOVE || event.getActionMasked() == MotionEvent.ACTION_UP) PlayerViewFork.dispatchDiscMenuTouchEvent(getPlayerView(), event);
         return true;
     }
 
@@ -334,8 +335,8 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     }
 
     public void toggleDebugView() {
-        getPlayerView().toggleDebugView();
-        PlayerSetting.putDebug(getPlayerView().isDebugViewVisible());
+        PlayerViewFork.toggleDebugView(getPlayerView());
+        PlayerSetting.putDebug(PlayerViewFork.isDebugViewVisible(getPlayerView()));
     }
 
     public void onChoose() {
@@ -814,7 +815,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
 
     private void hidePlayerViewForWebPlayback() {
         PlayerView playerView = getPlayerView();
-        playerView.setDiscMenuController(null);
+        PlayerViewFork.setDiscMenuController(playerView, null);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         View shutter = playerView.findViewById(androidx.media3.ui.R.id.exo_shutter);
         if (shutter != null) shutter.setVisibility(View.VISIBLE);
@@ -826,13 +827,13 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
         getPlayerView().setPlayer(player);
         player().bindPlayerView(getPlayerView());
         danmakuController.bind(getPlayerView());
-        getPlayerView().setDiscMenuController(discMenu());
+        PlayerViewFork.setDiscMenuController(getPlayerView(), discMenu());
         syncDanmakuSource();
         restoreDebugView();
     }
 
     private void restoreDebugView() {
-        if (PlayerSetting.isDebug() && !getPlayerView().isDebugViewVisible()) getPlayerView().toggleDebugView();
+        if (PlayerSetting.isDebug() && !PlayerViewFork.isDebugViewVisible(getPlayerView())) PlayerViewFork.toggleDebugView(getPlayerView());
     }
 
     private void configurePlayerView() {
@@ -1072,7 +1073,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     public void onPlaybackStateChanged(int state) {
         if (!isOwner()) return;
         onStateChanged(state);
-        getPlayerView().setDiscMenuController(discMenu());
+        PlayerViewFork.setDiscMenuController(getPlayerView(), discMenu());
     }
 
     @Override
@@ -1111,7 +1112,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
         setRedirect(false);
         dispatchPendingObservers();
         updatePlaybackPlayerState();
-        getPlayerView().setDiscMenuController(discMenu());
+        PlayerViewFork.setDiscMenuController(getPlayerView(), discMenu());
         if (webView != null) webView.onResume();
         if (!isWebPlaybackActive()) {
             resumePlayback();
@@ -1133,7 +1134,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     protected void onStop() {
         super.onStop();
         discMenuHeldKeys.clear();
-        getPlayerView().setDiscMenuController(null);
+        PlayerViewFork.setDiscMenuController(getPlayerView(), null);
         if ((isWebPlaybackActive() || isOwner()) && (isFinishing() || PlayerSetting.isBackgroundOff())) pausePlayback();
         if (!isInPictureInPictureMode()) detachPlayerView();
     }
@@ -1141,7 +1142,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     @Override
     protected void onDestroy() {
         discMenuHeldKeys.clear();
-        getPlayerView().setDiscMenuController(null);
+        PlayerViewFork.setDiscMenuController(getPlayerView(), null);
         pendingResume = null;
         releaseWebView();
         clearObservers();

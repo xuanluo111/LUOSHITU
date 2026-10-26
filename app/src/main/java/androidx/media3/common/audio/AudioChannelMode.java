@@ -2,4 +2,14 @@
 package androidx.media3.common.audio;
 
 public class AudioChannelMode {
+	public Object STEREO;
+	public Object MONO;
+	public Object REVERSE;
+	public Object AUTO;
+	public boolean isAvailable(int p0, int p1) { return false; }
+	public int resolve(int p0, int p1) { return 0; }
+	public boolean isAvailable(int p0) { return false; }
+	public boolean canBalance(int p0) { return false; }
+	public boolean isAuto(int p0) { return false; }
+	public Object clamp(int p0) { return null; }
 }

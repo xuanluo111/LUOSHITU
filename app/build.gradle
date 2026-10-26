@@ -99,6 +99,10 @@ android {
 }
 
 // AGP 9 内置 Kotlin（无独立插件），jvmTarget 须与 Java 21 对齐
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xmaxerrs' << '10000'
+}
+
 tasks.withType(KotlinCompile).configureEach {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_21

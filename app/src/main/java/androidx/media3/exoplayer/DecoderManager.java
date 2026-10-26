@@ -2,4 +2,12 @@
 package androidx.media3.exoplayer;
 
 public class DecoderManager {
+	public Object attach(ExoPlayer p0) { return null; }
+	public Object getAudioMode(Object p0) { return null; }
+	public Object getVideoMode(Object p0) { return null; }
+	public Object selectAudioDecoder(DecoderMode p0) { return null; }
+	public Object selectVideoDecoder(DecoderMode p0) { return null; }
+	public void setDecoderModes(DecoderMode p0, DecoderMode p1) { }
+	public Object detach(Object p0) { return null; }
+	public Object createTrackSelector(App p0) { return null; }
 }

@@ -2,4 +2,5 @@
 package androidx.media3.common;
 
 public class MediaEdition {
+	public Object selected;
 }

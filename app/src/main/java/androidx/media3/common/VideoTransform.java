@@ -2,4 +2,6 @@
 package androidx.media3.common;
 
 public class VideoTransform {
+	public Object MAX_SCALE;
+	public Object DEFAULT;
 }

@@ -2,4 +2,8 @@
 package androidx.media3.common.audio;
 
 public class AudioChannelMix {
+	public float[][] createStereoMix(int p0, boolean p1) { return null; }
+	public float[][] createMonoMix(int p0) { return null; }
+	public float[][] createFrontBalanceMix(int p0, float p1) { return null; }
+	public float[][] compose(Object p0, Object p1) { return null; }
 }

@@ -4,4 +4,6 @@ package androidx.media3.common.text;
 public class SubtitleSelectionState {
 	public Object EMPTY;
 	public Object activeSecondarySelection;
+	public boolean isPrimary(TrackSelectionOverride p0) { return false; }
+	public boolean isActiveSecondary(TrackSelectionOverride p0) { return false; }
 }

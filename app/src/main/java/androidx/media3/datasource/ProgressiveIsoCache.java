@@ -2,4 +2,6 @@
 package androidx.media3.datasource;
 
 public class ProgressiveIsoCache {
+	public Object withDiskCache(Factory p0, Cache p1) { return null; }
+	public static class Factory { }
 }

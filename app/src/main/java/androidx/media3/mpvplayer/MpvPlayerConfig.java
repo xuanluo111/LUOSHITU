@@ -2,4 +2,5 @@
 package androidx.media3.mpvplayer;
 
 public class MpvPlayerConfig {
+	public static class Builder { }
 }

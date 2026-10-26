@@ -2,4 +2,8 @@
 package androidx.media3.exoplayer.iso;
 
 public class IsoNavigationPlayerController {
+	public Object getPlayer(Object p0) { return null; }
+	public void close(Object p0) { }
+	public void prepareMediaSource(App p0, MediaSource p1, Factory p2) { }
+	public boolean isStarted(Object p0) { return false; }
 }

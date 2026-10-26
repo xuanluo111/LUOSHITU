@@ -2,4 +2,5 @@
 package androidx.media3.exoplayer.source;
 
 public class ContentTypeResolvingMediaSource {
+	public static class Factory { }
 }

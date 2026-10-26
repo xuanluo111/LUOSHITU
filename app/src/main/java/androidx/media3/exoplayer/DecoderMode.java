@@ -3,4 +3,11 @@ package androidx.media3.exoplayer;
 
 public class DecoderMode {
 	public Object AUTO;
+	public Object HARDWARE;
+	public Object SOFTWARE;
+	public Object FFMPEG;
+	public Object values(Object p0) { return null; }
+	public DecoderMode fromCommonDecoderMode(androidx.media3.common.DecoderMode p0) { return null; }
+	public Object toCommonDecoderMode(Object p0) { return null; }
+	public Object name(Object p0) { return null; }
 }

@@ -2,4 +2,7 @@
 package androidx.media3.common.util;
 
 public class LocalClearKeyLicense {
+	public int parse(DrmConfiguration p0) { return 0; }
+	public int parse(String p0) { return 0; }
+	public static class DrmConfiguration { }
 }

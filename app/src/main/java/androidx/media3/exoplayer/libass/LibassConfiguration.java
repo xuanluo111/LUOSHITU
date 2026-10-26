@@ -2,4 +2,5 @@
 package androidx.media3.exoplayer.libass;
 
 public class LibassConfiguration {
+	public static class Builder { }
 }

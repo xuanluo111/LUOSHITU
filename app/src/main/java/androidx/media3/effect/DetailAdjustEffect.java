@@ -2,4 +2,5 @@
 package androidx.media3.effect;
 
 public class DetailAdjustEffect {
+	public void setAdjustment(VideoAdjustment p0) { }
 }

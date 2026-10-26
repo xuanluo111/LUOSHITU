@@ -2,5 +2,9 @@
 package androidx.media3.exoplayer.source.preload;
 
 public class DiskPreloadManager {
+	public void start(ExoPlayer p0, MediaItem p1, Options p2) { }
+	public void stop(Object p0) { }
+	public void release(Object p0) { }
 	public static class Options { }
+	public static class Builder { }
 }

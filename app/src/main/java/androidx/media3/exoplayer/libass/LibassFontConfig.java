@@ -2,4 +2,6 @@
 package androidx.media3.exoplayer.libass;
 
 public class LibassFontConfig {
+	public Object write(File p0, File p1, Object p2) { return null; }
+	public static class File { }
 }

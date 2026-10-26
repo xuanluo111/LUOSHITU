@@ -2,9 +2,10 @@
 package androidx.media3.ui;
 
 public class PlayerSeekView {
-	public Object findViewById(int p0) { return null; }
+	public View findViewById(int p0) { return null; }
 	public void setPlayer(Object p0) { }
 	public void setVisibility(int p0) { }
 	public Object getTimeBar(Object p0) { return null; }
 	public void setDurationSupplier(Object p0) { }
+	public static class View { }
 }
