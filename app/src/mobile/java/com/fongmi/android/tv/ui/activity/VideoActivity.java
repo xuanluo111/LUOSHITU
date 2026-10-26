@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.ui.activity;
 
+
 import static com.github.catvod.utils.Util.substring;
 
 import android.animation.ValueAnimator;
