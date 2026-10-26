@@ -2,4 +2,5 @@
 package androidx.media3.mpvplayer;
 
 public class MpvSubtitleOptions {
+	public static class Builder { }
 }

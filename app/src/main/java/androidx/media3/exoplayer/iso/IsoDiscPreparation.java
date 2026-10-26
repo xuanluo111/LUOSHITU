@@ -2,4 +2,6 @@
 package androidx.media3.exoplayer.iso;
 
 public class IsoDiscPreparation {
+	public boolean isIso(MediaItem p0) { return false; }
+	public static class MediaItem { }
 }
