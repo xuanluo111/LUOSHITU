@@ -46,6 +46,10 @@ class AbiApkPackaging {
     private static void configureNativeLibraries(Project project, def variant, List<String> abis) {
         variant.packaging.jniLibs.excludes.addAll((THUNDER_LIBRARIES + MPV_LIBRARIES + [RUNTIME_PROFILES.nodejs.library, RUNTIME_PROFILES.quickjs.library]).collect { "**/${it}".toString() })
         variant.packaging.jniLibs.keepDebugSymbols.add('**/libc++_shared.so')
+        // 洛视频：私有 mpv/ffmpeg aar 缺失时（官方 media3 替代方案）跳过 MPV 原生库校验（docs/S0-立项报告.md §9）
+        def mpvAar = new File(project.projectDir, 'libs/lib-mpvplayer-release.aar')
+        def ffmpegAar = new File(project.projectDir, 'libs/lib-decoder-ffmpeg-release.aar')
+        if (!(mpvAar.exists() && ffmpegAar.exists())) return
         def validation = project.tasks.register("verify${variant.name.capitalize()}MpvNative", VerifyMpvNativeTask) { task ->
             task.mpvArchive.set(project.layout.projectDirectory.file('libs/lib-mpvplayer-release.aar'))
             task.ffmpegArchive.set(project.layout.projectDirectory.file('libs/lib-decoder-ffmpeg-release.aar'))

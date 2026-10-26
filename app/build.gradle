@@ -1,9 +1,10 @@
 import com.android.build.api.artifact.SingleArtifact
 import com.fongmi.gradle.AbiApkPackaging
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias libs.plugins.android.application
-    alias libs.plugins.kotlin.android
 }
 
 def localProps = new Properties()
@@ -95,9 +96,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
+}
 
-    kotlinOptions {
-        jvmTarget = '21'
+// AGP 9 内置 Kotlin（无独立插件），jvmTarget 须与 Java 21 对齐
+tasks.withType(KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
     }
 }
 
@@ -106,6 +110,7 @@ AbiApkPackaging.configure(project, SingleArtifact.APK.INSTANCE)
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.aar"])
     implementation project(':catvod')
+    implementation libs.bundles.media3
     implementation libs.appcompat
     implementation libs.lifecycle.service
     implementation libs.media
@@ -140,5 +145,8 @@ dependencies {
     coreLibraryDesugaring libs.desugar
     testImplementation libs.junit
 }
+
+// 媒体内核：官方 media3 1.11.1 Maven（替代上游私有 aar，决策见 docs/S0-立项报告.md 第 9 节）
+// fork 专有类的补齐桩放在 app/src/main/java/androidx/media3/（标 @Deprecated 便于识别，获取真实 aar 后整目录删除）
 
 if (file('test.gradle').isFile()) apply from: 'test.gradle'
