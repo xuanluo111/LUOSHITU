@@ -98,6 +98,14 @@ public final class ParseWebView extends WebView implements DialogInterface.OnDis
 
     public ParseWebView start(String key, String from, Map<String, String> headers, String url, String click, ParseCallback callback, boolean detect) {
         SpiderDebug.log(TAG, "key=%s, from=%s, click=%s, url=%s, headers=%s", key, from, click, url, headers);
+        // 洛视频安全红线：嗅探入口仅允许 http(s)，本地 scheme 一律拒绝
+        String entryScheme = Uri.parse(url).getScheme();
+        if (entryScheme == null || (!"http".equalsIgnoreCase(entryScheme) && !"https".equalsIgnoreCase(entryScheme))) {
+            ParseCallback cb = callbackRef.getAndSet(null);
+            stopped = true;
+            if (cb != null) cb.onParseError();
+            return this;
+        }
         App.post(timer, Constant.TIMEOUT_PARSE_WEB);
         callbackRef.set(callback);
         this.detect = detect;
@@ -193,6 +201,10 @@ public final class ParseWebView extends WebView implements DialogInterface.OnDis
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            // 洛视频安全红线：嗅探 WebView 禁止离开 http(s)（file/content 等本地 scheme 不得加载）
+            Uri uri = request.getUrl();
+            String scheme = uri == null ? null : uri.getScheme();
+            if (scheme != null && !"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) return true;
             return false;
         }
     }
