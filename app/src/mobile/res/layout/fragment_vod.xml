@@ -108,5 +108,11 @@
         app:srcCompat="@drawable/ic_fab_top"
         app:tint="?attr/colorOnSecondaryContainer"
         tools:visibility="visible" />
+    <include
+        android:id="@+id/notReady"
+        layout="@layout/view_not_ready"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

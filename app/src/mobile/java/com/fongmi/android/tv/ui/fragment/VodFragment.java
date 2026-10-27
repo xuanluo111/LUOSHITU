@@ -227,7 +227,10 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onConfigEvent(ConfigEvent event) {
-        if (event.type() == ConfigEvent.Type.VOD) setLogo();
+        if (event.type() == ConfigEvent.Type.VOD) {
+            hideNotReady();
+            setLogo();
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -261,6 +264,16 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
         ReceiveDialog.create().event(event).show(this);
     }
 
+    /** 洛视频 F2 未就绪态：不白屏、不弹英文错误码，给老人一个真实出口 */
+    private void showNotReady() {
+        mBinding.notReady.getRoot().setVisibility(View.VISIBLE);
+        mBinding.notReady.goLive.setOnClickListener(v -> ((HomeActivity) requireActivity()).change(1));
+    }
+
+    private void hideNotReady() {
+        mBinding.notReady.getRoot().setVisibility(View.GONE);
+    }
+
     @Override
     public void setConfig(Config config) {
         VodConfig.load(config, new Callback() {
@@ -275,8 +288,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
             @Override
             public void error(String msg) {
                 Notify.dismiss();
-                Notify.show(msg);
-                showContent();
+                showNotReady();
             }
         });
     }
