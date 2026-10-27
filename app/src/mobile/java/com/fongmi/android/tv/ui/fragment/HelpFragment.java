@@ -76,7 +76,7 @@ public class HelpFragment extends BaseFragment {
         button.setOnClickListener(v -> action.run());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin = 24;
-        root.addView(button, params);
+        button.setLayoutParams(params);
         return button;
     }
 
