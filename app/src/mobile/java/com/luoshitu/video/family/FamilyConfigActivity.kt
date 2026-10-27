@@ -46,6 +46,9 @@ class FamilyConfigActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 16)
         }
+        dirList = LinearLayout(applicationContext)
+        diagText = TextView(applicationContext).apply { setTextSize(16f); setTextColor(0xFF3C3C3C.toInt()) }
+        contactSection = contactSection()
         rootAdd(buildSection("粘贴配置地址"))
         pasteUrl = EditText(applicationContext).apply { setHint("粘贴节目单地址（例如 http://...）") }
         rootAdd(pasteUrl)
@@ -57,7 +60,8 @@ class FamilyConfigActivity : Activity() {
         rootAdd(buildSection("体检与诊断（仅家属可见，不弹给老人）", diagText))
         diagText.setOnClickListener { refreshDiagnosis() }
         rootAdd(buildSection("联系家人（「遇到问题？点这里」时显示）", contactSection))
-        rootAdd(buildSection("家属口令（保护本页：建议设为手机号后 4 位）", passgateSection))
+        rootAdd(buildSection("家属口令（保护本页：建议设为手机号后 4 位）", passgateSection()))
+        setContentView(root)
     }
 
     private fun buildSection(title: String, dirList: LinearLayout): LinearLayout {
@@ -68,7 +72,10 @@ class FamilyConfigActivity : Activity() {
 
     private fun buildSection(title: String, vararg children: android.view.View): LinearLayout {
         val card = cardBuilder(title)
-        children.forEach { card.addView(it) }
+        children.forEach {
+            (it.parent as? android.view.ViewGroup)?.removeView(it)
+            card.addView(it)
+        }
         return card
     }
 
@@ -86,6 +93,7 @@ class FamilyConfigActivity : Activity() {
     }
 
     private fun rootAdd(card: android.view.View) {
+        (card.parent as? android.view.ViewGroup)?.removeView(card)
         root.addView(card)
     }
 
