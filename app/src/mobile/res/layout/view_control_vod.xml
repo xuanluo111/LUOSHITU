@@ -115,14 +115,40 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/rewind15"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:background="@drawable/shape_control"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="−15秒"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            tools:visibility="visible" />
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/play"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="40dp"
-            android:layout_marginEnd="40dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
             android:background="@drawable/shape_control"
             android:src="@drawable/exo_icon_play" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/forward15"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:background="@drawable/shape_control"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="15秒▶"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/next"

@@ -354,6 +354,9 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.play.setOnClickListener(view -> checkPlay());
         mBinding.control.next.setOnClickListener(view -> checkNext());
         mBinding.control.prev.setOnClickListener(view -> checkPrev());
+        // 洛视频 F4：快进退 15 秒大按钮（老人不依赖手势）
+        mBinding.control.rewind15.setOnClickListener(view -> seekTo(-15000));
+        mBinding.control.forward15.setOnClickListener(view -> seekTo(15000));
         mBinding.control.setting.setOnClickListener(view -> onSetting());
         mBinding.control.heading.setOnLongClickListener(view -> onChange());
         mBinding.control.right.lock.setOnClickListener(view -> onLock());
