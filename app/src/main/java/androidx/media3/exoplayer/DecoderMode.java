@@ -14,7 +14,7 @@ public class DecoderMode {
 
     public String name(Object p0) { return name; }
 
-    public Object toCommonDecoderMode(Object p0) { return androidx.media3.common.DecoderMode.AUTO; }
+    public Object toCommonDecoderMode() { return androidx.media3.common.DecoderMode.AUTO; }
     public DecoderMode fromCommonDecoderMode(androidx.media3.common.DecoderMode p0) { return AUTO; }
 
     public Object values(Object p0) { return new DecoderMode[]{AUTO, HARDWARE, SOFTWARE, FFMPEG}; }

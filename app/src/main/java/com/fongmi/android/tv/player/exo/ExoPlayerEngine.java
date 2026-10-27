@@ -1,5 +1,7 @@
 package com.fongmi.android.tv.player.exo;
 
+import androidx.media3.fork.MediaFork;
+
 
 import android.util.Log;
 
@@ -308,7 +310,7 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
 
     @Override
     public void bindPlayerView(PlayerView playerView) {
-        playerView.setBackendPlayer(player);
+        MediaFork.setBackendPlayer(playerView, player);
         subtitles.bindPlayerView(playerView);
     }
 
@@ -334,12 +336,12 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
 
     @Override
     public SubtitleOffsets getSubtitleOffsets() {
-        return player.getSubtitleOffsets();
+        return MediaFork.getSubtitleOffsets(player);
     }
 
     @Override
     public void setSubtitleOffsets(SubtitleOffsets offsets) {
-        player.setSubtitleOffsets(offsets);
+        MediaFork.setSubtitleOffsets(player, offsets);
     }
 
     @Override

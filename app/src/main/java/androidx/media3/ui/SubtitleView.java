@@ -3,7 +3,7 @@ package androidx.media3.ui;
 
 public class SubtitleView {
 	public Object DEFAULT_TEXT_SIZE_FRACTION;
-	public void reset(Object p0) { }
+	public void reset() { }
 	public void setStyle(CaptionStyleCompat p0) { }
 	public void setApplyEmbeddedStyles(boolean p0) { }
 	public void setApplyEmbeddedFontSizes(boolean p0) { }

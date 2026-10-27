@@ -2,6 +2,9 @@
 // 磁盘预加载在本产品跟随设置开关；桩实现为无操作容器。
 package androidx.media3.exoplayer.source.preload;
 
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.exoplayer.source.RenderersFactory;
@@ -26,7 +29,7 @@ public class DiskPreloadManager {
 
     public boolean preload(Object mediaItem) { return false; }
     public void start(ExoPlayer p0, MediaItem p1, Options p2) { }
-    public void stop(Object p0) { }
-    public void release(Object p0) { }
+    public void stop() { }
+    public void release() { }
     public void cancel() { }
 }

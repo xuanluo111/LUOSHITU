@@ -8,7 +8,4 @@ public class VideoTransform {
 
     public float scaleX = 1f, scaleY = 1f, panX, panY;
 
-	public static Object scaleX;
-	public static Object scaleY;
-	public static Object panX;
 }

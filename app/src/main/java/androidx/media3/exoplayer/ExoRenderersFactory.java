@@ -3,8 +3,7 @@ package androidx.media3.exoplayer;
 
 public class ExoRenderersFactory {
 
-    public void setDecoderManager(DecoderManager p0) { return this; }
-    public void setEnableSurfaceControlFrameRetention(boolean p0) { return this; }
-    public void setDolbyVisionOutputPolicy(int p0) { return this; }
-	public void setDecoderManager(DecoderManager p0) { }
+    public ExoRenderersFactory setDecoderManager(DecoderManager p0) { return this; }
+    public ExoRenderersFactory setEnableSurfaceControlFrameRetention(boolean p0) { return this; }
+    public ExoRenderersFactory setDolbyVisionOutputPolicy(int p0) { return this; }
 }

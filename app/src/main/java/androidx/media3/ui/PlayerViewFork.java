@@ -11,8 +11,8 @@ public final class PlayerViewFork {
 
     private PlayerViewFork() { }
 
-    public void setDiscMenuController(PlayerView p0, DiscMenuController p1) { }
-    public Object dispatchDiscMenuTouchEvent(PlayerView p0, MotionEvent p1) { return false; }
-    public boolean isDebugViewVisible(PlayerView p0) { return false; }
-    public Object toggleDebugView(PlayerView p0) { }
+    public static void setDiscMenuController(PlayerView view, DiscMenuController controller) { }
+    public static boolean dispatchDiscMenuTouchEvent(PlayerView view, MotionEvent event) { return false; }
+    public static boolean isDebugViewVisible(PlayerView view) { return false; }
+    public static void toggleDebugView(PlayerView view) { }
 }

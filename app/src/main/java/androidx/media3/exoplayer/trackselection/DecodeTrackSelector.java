@@ -2,7 +2,7 @@
 package androidx.media3.exoplayer.trackselection;
 
 public class DecodeTrackSelector {
-	public Object buildUponParameters(Object p0) { return null; }
+	public Object buildUponParameters() { return null; }
 	public void setParameters(Parameters p0) { }
 	public static class Parameters { }
 }

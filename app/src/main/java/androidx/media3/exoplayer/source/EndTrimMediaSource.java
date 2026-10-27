@@ -3,6 +3,6 @@ package androidx.media3.exoplayer.source;
 
 public class EndTrimMediaSource {
 	public void setEndTrimDurationMs(long p0) { }
-	public boolean isEndTrimActive(Object p0) { return false; }
-	public Object getOriginalDurationMs(Object p0) { return null; }
+	public boolean isEndTrimActive() { return false; }
+	public Object getOriginalDurationMs() { return null; }
 }

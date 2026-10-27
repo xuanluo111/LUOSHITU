@@ -18,7 +18,7 @@ import androidx.media3.exoplayer.DecoderMode;
 
 public abstract class MpvPlayer extends DiscMenuController implements Player {
 
-    public boolean isAvailable(Object p0) { return false; }
+    public boolean isAvailable() { return false; }
 
     public static final int VIDEO_EFFECTS_SUPPORTED = 0;
     public static final int VIDEO_EFFECTS_UNSUPPORTED_DRM = 1;
@@ -28,12 +28,12 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public static final int AUDIO_EFFECTS_SUPPORTED = 0;
     public static final int AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH = 1;
 
-    public Object getVideoEffectsSupport(Object p0) { return VIDEO_EFFECTS_UNSUPPORTED_RENDERER; }
-    public Object getAudioEffectsSupport(Object p0) { return AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH; }
-    public boolean isVideoSharpnessSupported(Object p0) { return false; }
+    public Object getVideoEffectsSupport() { return VIDEO_EFFECTS_UNSUPPORTED_RENDERER; }
+    public Object getAudioEffectsSupport() { return AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH; }
+    public boolean isVideoSharpnessSupported() { return false; }
     public void setVideoEqualizer(Object p0) { }
     public void setAudioFilter(MpvAudioFilter p0) { }
-    public void setSubtitleContentLoader(SubtitleFileContent p0) { }
+    public void setSubtitleContentLoader(MpvSubtitleContentLoader loader) { }
     public void setSubtitleOptions(MpvSubtitleOptions p0) { }
 
     public static class Builder {
@@ -76,28 +76,28 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
 
     public void setLogListener(int p0, Object p1) { }
     public Object unloadScript(long p0) { }
-    public void setStartupScripts(Object p0) { return false; }
+    public boolean setStartupScripts(Object p0) { return false; }
     public String getScriptData(String p0) { return null; }
-    public Object getInputBindings(Object p0) { return null; }
+    public Object getInputBindings() { return null; }
     public Object runScriptBinding(String p0) { return false; }
     public void setAudioOutputListener(Object p0) { }
     public void setAudioFilterListener(Object p0) { }
     public void setVerboseLoggingEnabled(boolean p0) { }
-    public Object getAudioChannelCount(Object p0) { return 0; }
-    public Object getSubtitleSelectionState(Object p0) { return null; }
+    public Object getAudioChannelCount() { return 0; }
+    public Object getSubtitleSelectionState() { return null; }
     public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride p0) { return null; }
-    public SubtitleOffsets getSubtitleOffsets(Object p0) { return null; }
+    public SubtitleOffsets getSubtitleOffsets() { return null; }
     public void setSubtitleOffsets(SubtitleOffsets p0) { }
     public void setSubtitleContentEnabled(boolean p0) { }
     public boolean canRetrySubtitleContent(Format p0) { return false; }
     public Object retrySubtitleContent(Format p0) { }
     public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride p0) { }
     public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
-    public void resetSecondaryTextTrackSelection(Object p0) { }
-    public void addSubtitle(SubtitleConfiguration p0) { return false; }
-    public Object getVideoDecoderMode(Object p0) { return null; }
+    public void resetSecondaryTextTrackSelection() { }
+    public boolean addSubtitle(MediaItem.SubtitleConfiguration p0) { return false; }
+    public Object getVideoDecoderMode() { return null; }
     public void setVideoDecoderMode(DecoderMode mode) { }
-    public void setDiscDataSourceFactory(Factory p0) { }
+    public void setDiscDataSourceFactory(androidx.media3.datasource.DataSource.Factory p0) { }
     public void setMediaItem(MediaItem p0, long p1) { }
     public Uri getLocalConfigurationUri() { return null; }
 	public Object getApplicationLooper(Object p0) { }

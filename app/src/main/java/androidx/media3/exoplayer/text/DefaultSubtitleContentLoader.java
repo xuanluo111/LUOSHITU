@@ -2,4 +2,6 @@
 package androidx.media3.exoplayer.text;
 
 public class DefaultSubtitleContentLoader {
+    public DefaultSubtitleContentLoader(androidx.media3.extractor.SubtitleParser.Factory factory) { }
+    public androidx.media3.common.text.SubtitleContent load(androidx.media3.common.MediaItem item, android.net.Uri uri, androidx.media3.common.Format format) { return null; }
 }

@@ -88,121 +88,6 @@ OFFICIAL = {'R', 'PlayerView', 'MatroskaExtractor', 'DefaultExtractorsFactory', 
 
 def main():
     text = open(LOG, encoding='utf-8', errors='replace').read()
-    state = load_state()
-    pkgs = set(re.findall(r'程序包 ?([\w.]+)不存在', text)) | set(re.findall(r'package ([\w.]+) does not exist', text))
-    src_import_cache = {}
-    def imports_of(path):
-        if path not in src_import_cache:
-            d = {}
-            try:
-                for im in open(path, encoding='utf-8', errors='replace'):
-                    m = re.match(r'import (androidx\.media3[\w.]*)\.(\w+);', im.strip())
-                    if m: d.setdefault(m.group(2), m.group(1))
-                for im in open(path, encoding='utf-8', errors='replace'):
-                    m = re.match(r'import (androidx\.media3[\w.]*)\.\*;', im.strip())
-                    if m: d.setdefault('*', []).append(m.group(1))
-            except FileNotFoundError: pass
-            src_import_cache[path] = d
-        return src_import_cache[path]
-
-    stub_names = {}
-    for dirpath, _, files in os.walk(STUB):
-        for fn in files:
-            if fn.endswith('.java'):
-                rel = os.path.relpath(os.path.join(dirpath, fn), STUB)
-                parts = rel[:-5].split(os.sep)
-                fqn = '.'.join(parts[:-1]) + '.' + parts[-1]
-                stub_names[parts[-1]] = fqn
-                stub_names[fqn] = fqn
-    unresolved = {}
-
-    blocks = re.findall(r'([^\s:]+\.java):(\d+): (?:错误|error): 找不到符号\n(?:.*\n)*?\s*符号: +(\S+) ?([^\n]*)\n\s*位置: ([^\n]*)', text)
-    for f, line, kind, detail, loc in blocks:
-        if kind in ('类', 'class'):
-            name = detail.strip()
-            imps = imports_of(f.split(':')[0])
-            fqn = None
-            if name in imps:
-                fqn = imps[name] + '.' + name
-            else:
-                for wpkg in imps.get('*', []):
-                    if wpkg in pkgs: fqn = wpkg + '.' + name; break
-                if not fqn and stub_names.get(name) is None and loc:
-                    lm2 = re.search(r'类 ([\w.]+)|class ([\w.]+)', loc)
-                    parent = (lm2.group(1) or lm2.group(2)) if lm2 else None
-                    pfqn = stub_names.get(parent) if parent else None
-                    if pfqn:
-                        info = state.setdefault(pfqn, {'pkg': pfqn.rsplit('.',1)[0], 'name': pfqn.rsplit('.',1)[1], 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-                        if name not in info.setdefault('nested', []): info['nested'].append(name)
-                        continue
-            if fqn:
-                pkg, cls = fqn.rsplit('.', 1)
-                state.setdefault(fqn, {'pkg': pkg, 'name': cls, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-        elif kind in ('方法', 'method'):
-            name = detail.strip().split('(')[0]
-            params = detail.strip()[len(name):].strip()
-            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)|类型为 ?([\w.<>]*)的(?:局部)?变量 ([\w.]+)', loc)
-            tgt = (lm.group(1) or lm.group(2) or lm.group(3)) if lm else None
-            fqn = stub_names.get(tgt) if tgt else None
-            if fqn and fqn.rsplit('.',1)[-1] in OFFICIAL: fqn = None
-            if fqn:
-                pkg, cls = fqn.rsplit('.', 1)
-                info = state.setdefault(fqn, {'pkg': pkg, 'name': cls, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-                params = clean_params(params)
-                if not any(m['name'] == name and m['params'] == params for m in info['methods']):
-                    info['methods'].append({'name': name, 'params': params, 'ret': default_ret(name)})
-            elif tgt:
-                unresolved.setdefault(tgt, set()).add(name + params)
-        elif kind in ('变量', 'variable'):
-            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)|类型为 ?([\w.<>]*)的(?:局部|记录组件)? ?变量 ([\w.]+)|记录组件 ([\w.]+)', loc)
-            tgt = (lm.group(1) or lm.group(2) or lm.group(3) or lm.group(5)) if lm else None
-            fqn = stub_names.get(tgt) if tgt else None
-            if fqn:
-                pkg, cls = fqn.rsplit('.', 1)
-                info = state.setdefault(fqn, {'pkg': pkg, 'name': cls, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-                if detail.strip() not in info['fields']: info['fields'].append(detail.strip())
-            elif tgt:
-                unresolved.setdefault(tgt, set()).add('field ' + detail.strip())
-        elif kind in ('构造器', 'constructor'):
-            lm = re.search(r'类 ([\w.]+)|class ([\w.]+)', loc)
-            tgt = (lm.group(1) or lm.group(2)) if lm else None
-            fqn = stub_names.get(tgt) if tgt else None
-            if fqn:
-                pkg, cls = fqn.rsplit('.', 1)
-                info = state.setdefault(fqn, {'pkg': pkg, 'name': cls, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-                sig = 'public ' + cls + detail.strip()
-                if sig not in info['ctors']: info['ctors'].append(sig)
-            elif tgt:
-                unresolved.setdefault(tgt, set()).add('ctor ' + detail.strip())
-
-    # 返回类型修正：从"不兼容的类型: Object无法转换为 X"与 '==' 操作数错误反推
-    import re as _re
-    text_lines = text.split('\n')
-    def ret_fix(match_type, fpath, lineno):
-        try: srcline = text_lines[int(lineno) - 1] if fpath.startswith('/') else ''
-        except Exception: return None
-        idx = srcline.find(match_type)  # 定位失败则全行找
-        return srcline
-    for m in _re.finditer(r'([^\s:]+\.java):(\d+): (?:错误|error): 不兼容的类型: ?Object无法转换为 ?([\w.<>\[\], ]+)', text):
-        fpath, lineno, want = m.group(1), m.group(2), m.group(3).strip()
-        try: srcline = open(fpath.split(':')[0], encoding='utf-8', errors='replace').read().split('\n')[int(lineno) - 1]
-        except Exception: continue
-        for key, info in state.items():
-            for meth in info.get('methods', []):
-                if meth['ret'] == 'Object' and meth['name'] in srcline:
-                    meth['ret'] = want
-    for m in _re.finditer(r'([^\s:]+\.java):(\d+): (?:错误|error): 二元运算符 [^\n]*?第二个类型: ([\w.<>\[\], ]+)', text):
-        fpath, lineno, want = m.group(1), m.group(2), m.group(3).strip()
-        try: srcline = open(fpath.split(':')[0], encoding='utf-8', errors='replace').read().split('\n')[int(lineno) - 1]
-        except Exception: continue
-        for key, info in state.items():
-            for meth in info.get('methods', []):
-                if meth['ret'] == 'Object' and meth['name'] in srcline:
-                    meth['ret'] = want
-
-    try: seeds = json.load(open(os.path.join(ROOT, 'build/classmap.json')))
-    except Exception: seeds = {}
-    # Pass: 桩文件补 import（符号为类且错误文件是桩）
     imp_map = {}
     for base in ('app/src', 'catvod/src'):
         for dirpath, _, files in os.walk(os.path.join(ROOT, base)):
@@ -214,84 +99,24 @@ def main():
                             if m2 and not m2.group(1).startswith('java.lang'):
                                 imp_map.setdefault(m2.group(2), m2.group(1))
                     except Exception: pass
-    for k2, v2 in seeds.items(): imp_map.setdefault(k2, v2)
-    def fix_import(fpath, fqn, simple):
-        if not fqn.rsplit('.', 1)[-1][:1].isupper(): return  # 禁止插入包名 import
-        try: content = open(fpath, encoding='utf-8').read()
-        except Exception: return
-        if 'import ' + fqn + ';' in content: return
-        lines = content.split('\n')
-        for i, l in enumerate(lines):
-            if l.startswith('package '):
-                lines.insert(i + 1, '\nimport ' + fqn + ';')
-                open(fpath, 'w', encoding='utf-8').write('\n'.join(lines))
-                return
-    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 找不到符号\n(?:.*\n)*?\s*符号: +类 ([\w.]+)\n\s*位置: +类 ([\w.]+)', text):
+    try:
+        seeds = json.load(open(os.path.join(ROOT, 'build/classmap.json')))
+        for k2, v2 in seeds.items(): imp_map.setdefault(k2, v2)
+    except Exception: pass
+    fixed = 0
+    for m in re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 找不到符号\n(?:.*\n)*?\s*符号: +类 ([\w.]+)\n\s*位置: +类 ([\w.]+)', text):
         fpath, cls_name = m.group(1), m.group(2)
         simple = cls_name.rsplit('.', 1)[-1]
         fqn = imp_map.get(simple)
-        if fqn and '.' in fqn:
-            fix_import(fpath.split(':')[0], fqn, simple)
-
-    # Pass: 参数类型按调用点修正（无法将类 X 中的方法 y 应用到给定类型 → 需要/发现）
-    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 无法将类 ([\w.]+)中的方法 (\w+)应用到给定类型\n(?:.*\n)*?\s*发现: +([^\n]+)', text):
-        tgt, mname, found = m.group(2), m.group(3), m.group(4).strip()
-        fqn = stub_names.get(tgt)
-        if not fqn: continue
-        info = state.get(fqn)
-        if not info: continue
-        if '没有参数' in found or 'no arguments' in found: newp = ''
-        else: newp = clean_params('(' + found + ')')
-        cands = [mm for mm in info['methods'] if mm['name'] == mname]
-        if cands:
-            cands[0]['params'] = newp
-            for extra in cands[1:]: info['methods'].remove(extra)
-        else:
-            info['methods'].append({'name': mname, 'params': newp, 'ret': default_ret(mname)})
-
-    # Pass: 静态上下文字段修正
-    for m in _re.finditer(r'([^\s:]+\.java):\d+: (?:错误|error): 无法从静态上下文中引用非静态 变量 (\w+)\n\s*位置: +类 ([\w.]+)', text):
-        fname, tgt = m.group(2), m.group(3)
-        fqn = stub_names.get(tgt)
-        if fqn and fqn in state:
-            info = state[fqn]
-            if fname in info.get('fields', []):
-                info['fields'] = [f for f in info['fields'] if f != fname] + [fname]
-                info['staticfields'] = info.get('staticfields', []) + [fname]
-
-    for line in open(os.path.join(ROOT, 'build/harvest_imports.txt')):
-        line = line.strip()
-        m = re.match(r'(androidx\.media3[\w.]*)\.(\w+)$', line)
-        if not m: continue
-        pkg, name = m.group(1), m.group(2)
-        if pkg not in pkgs: continue
-        parts = pkg.rsplit('.', 1)
-        if len(parts) == 2 and parts[1][:1].isupper():
-            pkey = parts[0] + '.' + parts[1]
-            if pkey in state:
-                if name not in state[pkey].setdefault('nested', []): state[pkey]['nested'].append(name)
-                continue
-        state.setdefault(pkg + '.' + name, {'pkg': pkg, 'name': name, 'methods': [], 'fields': [], 'ctors': [], 'nested': []})
-
-    save_state(state)
-    for key, info in state.items():
-        gen_file(info['pkg'], info['name'], info)
-        path2 = os.path.join(STUB, *info['pkg'].split('.'), info['name'] + '.java')
-        if '@hand' in open(path2, encoding='utf-8', errors='replace').read(2048):
-            content = open(path2, encoding='utf-8').read()
-            changed = False
-            for meth in info.get('methods', []):
-                pat = re.compile(r'public (?:static )?\w+[\w.<>\[\], ]* ' + re.escape(meth['name']) + r'\([^)]*\)')
-                sig = 'public ' + ('static ' if meth.get('static') else '') + meth['ret'] + ' ' + meth['name'] + '(' + named(meth['params']) + ')'
-                new = pat.sub(sig, content)
-                if new != content: content, changed = new, True
-                elif sig not in content and not pat.search(content):
-                    content = content.replace('\n}\n', '\n\t' + sig + ' { }\n}\n')
-                    changed = True
-
-            if changed: open(path2, 'w', encoding='utf-8').write(content)
-    json.dump({k: sorted(v) for k, v in unresolved.items()}, open(os.path.join(ROOT, 'build/unresolved.json'), 'w'), ensure_ascii=False, indent=1)
-    print(f'stubs total={len(state)} unresolved={ {k: len(v) for k, v in unresolved.items()} }')
+        if fqn and '.' in fqn and ('/androidx/media3/' in fpath or '/luoshitu/' in fpath):
+            try:
+                content = open(fpath.split(':')[0], encoding='utf-8').read()
+                if 'import ' + fqn + ';' not in content:
+                    content = re.sub(r'(package [\w.]+;)', lambda mm: mm.group(1) + '\n\nimport ' + fqn + ';', content, count=1)
+                    open(fpath.split(':')[0], 'w', encoding='utf-8').write(content)
+                    fixed += 1
+            except Exception: pass
+    print('imports fixed:', fixed)
 
 if __name__ == '__main__':
     main()

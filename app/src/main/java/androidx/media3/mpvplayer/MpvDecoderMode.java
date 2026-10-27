@@ -5,6 +5,6 @@ import androidx.media3.common.DecoderMode;
 public class MpvDecoderMode {
 
     public androidx.media3.common.DecoderMode toCommonDecoderMode() { return androidx.media3.common.DecoderMode.AUTO; }
-    public DecoderMode fromCommonDecoderMode(DecoderMode p0) { return new MpvDecoderMode(); }
+    public MpvDecoderMode fromCommonDecoderMode(DecoderMode p0) { return new MpvDecoderMode(); }
 	public Object AUTO;
 }

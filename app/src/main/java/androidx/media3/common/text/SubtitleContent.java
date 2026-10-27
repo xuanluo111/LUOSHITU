@@ -26,6 +26,4 @@ public class SubtitleContent {
 
     public boolean isEmpty() { return entries.isEmpty(); }
 
-	public static Object state;
-	public static Object entries;
 }

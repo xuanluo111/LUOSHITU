@@ -1110,7 +1110,7 @@ public class PlayerManager implements ParseCallback {
             if (audioOffsetMs != C.TIME_UNSET && player.isCommandAvailable(MediaFork.COMMAND_SET_AUDIO_OFFSET)) MediaFork.setAudioOffsetMs(player, audioOffsetMs);
             if (subtitleOffsets != null && player.isCommandAvailable(MediaFork.COMMAND_SET_TEXT_OFFSET)) {
                 if (manager.supportsSubtitleOffsets()) manager.setSubtitleOffsets(subtitleOffsets);
-                else player.setTextOffsetMs(subtitleOffsets.primaryMs);
+                else MediaFork.setTextOffsetMs(player, subtitleOffsets.primaryMs);
             }
             if (player.isCommandAvailable(Player.COMMAND_PLAY_PAUSE)) player.setPlayWhenReady(playWhenReady);
         }

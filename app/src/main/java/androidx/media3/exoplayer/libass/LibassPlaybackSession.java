@@ -15,14 +15,14 @@ public class LibassPlaybackSession {
 
     public static class MediaComponents {
         public ExtractorsFactory extractorsFactory;
-        public androidx.media3.extractor.SubtitleParser.Factory subtitleParserFactory;
+        public androidx.media3.extractor.text.SubtitleParser.Factory subtitleParserFactory;
     }
 
-    public boolean isAvailable(Object p0) { return false; }
+    public boolean isAvailable() { return false; }
 
     public void setPreloadMediaItem(Object p0) { }
-    public void close(Object p0) { }
-    public Object createClockRenderer(Object p0) { return null; }
+    public void close() { }
+    public Object createClockRenderer() { return null; }
     public void setBottomPositionFraction(float p0) { }
     public void setSecondaryBottomPositionFraction(float p0) { }
     public void setFontScale(float p0, boolean p1) { }

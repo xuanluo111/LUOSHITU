@@ -2,6 +2,7 @@
 package androidx.media3.common.audio;
 
 public class AudioChannelMode {
+    public static int resolve(int mode, int channelCount) { return mode; }
 	public Object STEREO;
 	public Object MONO;
 	public Object REVERSE;

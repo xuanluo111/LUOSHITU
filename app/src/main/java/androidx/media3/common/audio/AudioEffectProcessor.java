@@ -3,5 +3,5 @@ package androidx.media3.common.audio;
 
 public class AudioEffectProcessor {
 	public void setParameters(AudioEffectParameters p0, boolean p1) { }
-	public void resetParameters(Object p0) { }
+	public void resetParameters() { }
 }

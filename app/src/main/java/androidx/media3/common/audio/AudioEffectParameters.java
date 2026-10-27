@@ -5,18 +5,16 @@ public class AudioEffectParameters {
     public AudioEffectParameters() { }
 	public Object DEFAULT;
 	public boolean isCenterGainAvailable(int p0) { return false; }
-	public boolean hasEffect(Object p0) { return false; }
-	public boolean hasBands(Object p0) { return false; }
-	public int getChannelMode(Object p0) { return null; }
-	public float getBalance(Object p0) { return null; }
-	public boolean isLoudnessEnabled(Object p0) { return false; }
-	public int getBoostMillibels(Object p0) { return null; }
-	public int getPreampMillibels(Object p0) { return null; }
-	public short[] getEqualizerLevelsMillibels(Object p0) { return null; }
+	public boolean hasEffect() { return false; }
+	public boolean hasBands() { return false; }
+	public int getChannelMode() { return 0; }
+	public boolean isLoudnessEnabled() { return false; }
+	public int getBoostMillibels() { return 0; }
+	public short[] getEqualizerLevelsMillibels() { return null; }
 	public boolean shouldLimitOutput(int p0) { return false; }
 	public boolean hasCenterGain(int p0) { return false; }
-	public float[][] getCenterGainFactor(Object p0) { return null; }
-	public float getStability(Object p0) { return null; }
+	public float[][] getCenterGainFactor() { return null; }
+	public float getStability() { return 0f; }
 	public static class Builder {
 		public Builder setEqualizerBands(int[] frequencies, short[] levels) { return this; }
 		public Builder setStability(float v) { return this; }
