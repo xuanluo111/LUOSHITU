@@ -108,7 +108,7 @@ public final class ExoUtil {
             this.audioProcessor = audioProcessor;
             this.secondaryTextOutput = secondaryTextOutput;
             this.libassPlaybackSession = libassPlaybackSession;
-            if (decoderManager != null) setDecoderManager(decoderManager);
+            // 洛视频降级：DecoderManager 注入不启用
             setEnableDecoderFallback(true);
             setEnableSurfaceControlFrameRetention(true);
             experimentalSetEnableMediaCodecVideoRendererPrewarming(true);

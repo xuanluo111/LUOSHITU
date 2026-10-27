@@ -9,7 +9,7 @@ public class MpvPlayerConfig {
         public Builder addTlsCaFileFromAsset(Object app, String asset, Object target) { return this; }
         public Builder addAndroidSubtitleOptions(Object app, androidx.media3.mpvplayer.MpvSubtitleOptions options) { return this; }
         public Builder addDiskCacheOptions(Object cacheDir, int seconds) { return this; }
-        public Builder setDefaultFontDirectories(String... dirs) { return this; }
+        public Builder setDefaultFontDirectories(Object... dirs) { return this; }
         public Builder addConfigDirectory(Object dir) { return this; }
         public Builder addAndroidDefaults(Object cacheDir) { return this; }
         public MpvPlayerConfig build() { return new MpvPlayerConfig(); }

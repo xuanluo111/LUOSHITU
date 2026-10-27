@@ -5,6 +5,9 @@ import android.app.Application;
 import android.os.CancellationSignal;
 
 public class BdjRuntime {
+
+    public static void prepare(android.app.Application app, android.os.CancellationSignal signal) { }
+    public static Object getStatus(android.app.Application app) { return null; }
 	public void prepare(Application p0, CancellationSignal p1) { }
 	public Object getStatus(Application p0) { return null; }
 }

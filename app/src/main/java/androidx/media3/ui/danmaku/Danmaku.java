@@ -9,6 +9,13 @@ public class Danmaku {
     public static final int TYPE_REVERSE = 3;
 
     public long timeMs;
+    public int type;
+    public int color;
+    public float size;
+    public int[] colors;
     public String text;
     public String image;
+
+    public Danmaku() { }
+    public Danmaku(String text, long timeMs, int type, int color, float size, int[] colors) { this.text = text; this.timeMs = timeMs; this.type = type; this.color = color; this.size = size; this.colors = colors; }
 }

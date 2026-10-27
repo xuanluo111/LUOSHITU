@@ -1,8 +1,14 @@
 // @hand 洛视频补齐桩：替代上游私有 aar 中的 media3 fork 类（docs/S0-立项报告.md 第 9 节）。自动生成。
 package androidx.media3.exoplayer;
+import androidx.media3.common.Player;
 import com.fongmi.android.tv.App;
 
 public class DecoderManager {
+    public DecoderManager(Object audioMode, Object videoMode) { }
+    public void attach(Player player) { }
+    public Object getAudioMode() { return null; }
+    public Object getVideoMode() { return null; }
+    public DecodeTrackSelector createTrackSelector(App p0) { return null; }
     public DecoderManager(Object audioMode, Object videoMode) { }
     public DecoderManager() { }
 	public Object attach(ExoPlayer p0) { return null; }

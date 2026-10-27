@@ -125,8 +125,9 @@ def main():
             p = files.get(cls)
             if p:
                 s = read(p)
-                if re.search(r'\b' + name + r'\b\s*;', s):
-                    s = re.sub(r'(public )(' + re.escape(name) + r'\s*;)', r'\1static \2', s)
+                mm = re.search(r'((?:public|\tpublic)[^\n]*\b' + re.escape(name) + r'\b[^\n]*;)', s)
+                if mm and 'static' not in mm.group(1):
+                    s = s.replace(mm.group(1), mm.group(1).replace('public ', 'public static ', 1), 1)
                     write(p, s); fixed += 1
 
     # 5) 方法不会覆盖：以 App 侧签名为准改桩

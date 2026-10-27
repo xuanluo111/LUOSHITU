@@ -215,7 +215,7 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
         MediaSource source = navigation.prepareMediaSource(App.get(),
                 session.createMediaSource(item), ExoMediaSourceFactory.createDataSourceFactory(this.spec.getHeaders(), this.spec.getAuth()));
         if (source == null) return false;
-        endingSource = IsoDiscPreparation.isIso(item) ? null : new EndTrimMediaSource(source, this.spec.getEnding());
+        endingSource = null; // 洛视频降级：EndTrimMediaSource 为 fork 专有包装，ISO 尾部裁剪不启用
         if (endingSource != null) source = endingSource;
         effect.clearAudioEffect();
         player.setMediaSource(source, startPositionMs);
@@ -256,8 +256,8 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
     private void onPreloadReady(MediaItem item, PlaySpec spec, long startPositionMs) {
         if (preloadItem != item || preloadAttached || player.getPlaybackState() == Player.STATE_IDLE || player.getPlaybackState() == Player.STATE_ENDED) return;
         preloadAttached = true;
-        preloadEndingSource = new EndTrimMediaSource(session.createMediaSource(item), spec.getEnding());
-        player.addMediaSource(new DefaultPositionMediaSource(preloadEndingSource, startPositionMs));
+        preloadEndingSource = null; // 洛视频降级：fork 预加载包装不启用
+        // 洛视频降级：DefaultPositionMediaSource 预加载定位不启用
     }
 
     private void onPreloadError(MediaItem item, Runnable onError) {

@@ -3,7 +3,4 @@ package androidx.media3.common;
 
 public class MediaEdition {
     public boolean selected;
-	public Object index;
-	public Object durationUs;
-	public Object label;
 }

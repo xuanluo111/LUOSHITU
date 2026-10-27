@@ -37,6 +37,7 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public void setSubtitleOptions(MpvSubtitleOptions p0) { }
 
     public static class Builder {
+        public Builder(Object context) { }
         public Builder setVulkanEnabled(boolean b) { return this; }
         public Builder setGpuNextEnabled(boolean b) { return this; }
         public Builder setFontsDirectory(String... dirs) { return this; }
@@ -74,14 +75,14 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public interface AudioOutputListener { void onAudioOutputApplied(); }
     public interface AudioFilterListener { void onAudioFilterApplied(); }
 
-    public void setLogListener(int p0, Object p1) { }
+    public void setLogListener(int level, LogListener listener) { }
     public Object unloadScript(long p0) { }
-    public boolean setStartupScripts(Object p0) { return false; }
+    public boolean setStartupScripts(Object scripts) { return false; }
     public String getScriptData(String p0) { return null; }
     public Object getInputBindings() { return null; }
     public Object runScriptBinding(String p0) { return false; }
-    public void setAudioOutputListener(Object p0) { }
-    public void setAudioFilterListener(Object p0) { }
+    public void setAudioOutputListener(AudioOutputListener listener) { }
+    public void setAudioFilterListener(AudioFilterListener listener) { }
     public void setVerboseLoggingEnabled(boolean p0) { }
     public Object getAudioChannelCount() { return 0; }
     public Object getSubtitleSelectionState() { return null; }
@@ -95,7 +96,7 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
     public void resetSecondaryTextTrackSelection() { }
     public boolean addSubtitle(MediaItem.SubtitleConfiguration p0) { return false; }
-    public Object getVideoDecoderMode() { return null; }
+    public androidx.media3.exoplayer.DecoderMode getVideoDecoderMode() { return null; }
     public void setVideoDecoderMode(DecoderMode mode) { }
     public void setDiscDataSourceFactory(androidx.media3.datasource.DataSource.Factory p0) { }
     public void setMediaItem(MediaItem p0, long p1) { }

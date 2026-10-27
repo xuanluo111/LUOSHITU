@@ -2,8 +2,9 @@
 package androidx.media3.mpvplayer.audio;
 
 public class MpvAudioFilter {
+
+    public static final MpvAudioFilter EMPTY = new MpvAudioFilter();
     public MpvAudioFilter() { }
-	public Object EMPTY;
 	public static class Builder {
 		public Builder addDynamicNormalization(String id, double a, double b) { return this; }
 		public Builder addCompressor(String id, float a, float b, float c, float d) { return this; }

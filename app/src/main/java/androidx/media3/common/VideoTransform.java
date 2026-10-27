@@ -8,4 +8,7 @@ public class VideoTransform {
 
     public float scaleX = 1f, scaleY = 1f, panX, panY;
 
+    public VideoTransform() { }
+    public VideoTransform(float scaleX, float scaleY, float panX, float panY) { this.scaleX = scaleX; this.scaleY = scaleY; this.panX = panX; this.panY = panY; }
+
 }

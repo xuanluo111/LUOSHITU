@@ -158,7 +158,7 @@ public class ExoMediaSourceFactory implements MediaSource.Factory {
         } else subtitleParserFactory = new SubtitleTranscriptParserFactory(transcript);
         DataSource.Factory dataSourceFactory = createDataSourceFactory(ExoUtil.extractHeaders(mediaItem), ExoUtil.extractAuth(mediaItem));
         MediaSource.Factory factory = new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory).setSubtitleParserFactory(subtitleParserFactory);
-        return new ContentTypeResolvingMediaSource.Factory(factory, dataSourceFactory);
+        return factory; // 洛视频降级：ContentTypeResolvingMediaSource 类型解析包装不启用
     }
 
     static DefaultExtractorsFactory createDefaultExtractorsFactory() {

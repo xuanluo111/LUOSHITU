@@ -4,5 +4,6 @@ package androidx.media3.ui;
 import androidx.media3.common.Format;
 
 public class DefaultTrackNameProvider {
+    public DefaultTrackNameProvider(android.content.res.Resources resources) { }
 	public String getTrackName(Format p0) { return null; }
 }

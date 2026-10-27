@@ -12,6 +12,9 @@ public class CaptionStyleCompat {
 
     public static final CaptionStyleCompat DEFAULT = new CaptionStyleCompat();
 
+    public CaptionStyleCompat() { }
+    public CaptionStyleCompat(int foregroundColor, int backgroundColor, int windowColor, int edgeType, int edgeColor, Object typeface, float edgeWidth, float shadowOffset) { this.foregroundColor = foregroundColor; this.backgroundColor = backgroundColor; this.edgeType = edgeType; this.edgeColor = edgeColor; this.edgeWidth = edgeWidth; this.shadowOffset = shadowOffset; }
+
     public int foregroundColor = 0xFFFFFFFF;
     public int backgroundColor = 0x00000000;
     public int edgeType = EDGE_TYPE_NONE;

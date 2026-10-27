@@ -2,6 +2,7 @@
 package androidx.media3.mpvplayer.video;
 
 public class MpvVideoEqualizer {
-	public Object DEFAULT;
+
+    public static final MpvVideoEqualizer DEFAULT = new MpvVideoEqualizer();
 	public MpvVideoEqualizer create(float p0, float p1, float p2, float p3, float p4, float p5) { return null; }
 }

@@ -3,7 +3,7 @@ package androidx.media3.common.audio;
 
 public class AudioEffectParameters {
     public AudioEffectParameters() { }
-	public Object DEFAULT;
+    public static final AudioEffectParameters DEFAULT = new AudioEffectParameters();
 	public boolean isCenterGainAvailable(int p0) { return false; }
 	public boolean hasEffect() { return false; }
 	public boolean hasBands() { return false; }

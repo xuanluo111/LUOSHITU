@@ -2,6 +2,8 @@
 package androidx.media3.exoplayer;
 
 public class DecoderFallback {
+    public DecoderFallback(Object decoderManager) { }
+    public boolean retry(Object error) { return false; }
 	public void reset(int p0) { }
 	public Object retry(ExoPlaybackException p0) { return null; }
 }
