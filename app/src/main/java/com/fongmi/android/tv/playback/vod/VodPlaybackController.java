@@ -529,6 +529,9 @@ public class VodPlaybackController {
         else selectFlag(history.getFlag(), true);
         if (history.isRevSort()) reverseEpisode(true);
         if (state.getPlayingRequest() != null && !host.hasPlaybackSession()) requestSelectedEpisode();
+        // 洛视频 3.13 一点就播：无任何续播上下文（新片/集名匹配失败）时自动起播当前选中集
+        // （正序列表即第 1 集，revSort 数据首集即最新一集），选集面板保持收起
+        else if (state.getPlayingRequest() == null) requestSelectedEpisode();
     }
 
     private boolean restorePlaybackSelection(VodPlayRequest request) {
