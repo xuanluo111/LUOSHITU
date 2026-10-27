@@ -2,12 +2,14 @@ package com.luoshitu.video.smoke
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.fongmi.android.tv.App
 import com.luoshitu.video.probe.JarSmokeProbe
 
 /**
@@ -38,7 +40,13 @@ class SmokeActivity : Activity() {
         root.addView(output)
         setContentView(root)
 
-        button.setOnClickListener {
+        // 冒烟脚本自动化：extras 预填 + auto=1 自动执行（地址仍来自脚本参数，App 不预置任何配置）
+        intent.getStringExtra("jar")?.let { jarInput.setText(it) }
+        intent.getStringExtra("key")?.let { keyInput.setText(it) }
+        intent.getStringExtra("api")?.let { apiInput.setText(it) }
+        val auto = intent.getBooleanExtra("auto", false)
+
+        val runner = {
             output.text = "运行中…（下载 jar 可能需要几分钟）"
             button.isEnabled = false
             val jar = jarInput.text.toString().trim()
@@ -46,6 +54,7 @@ class SmokeActivity : Activity() {
             val api = apiInput.text.toString().trim()
             Thread {
                 val report = JarSmokeProbe.run(jar, key, api)
+                Log.i(TAG, "SMOKE_RESULT ok=${report.ok} siteKey=${report.siteKey} elapsedMs=${report.elapsedMs} detail=${report.detail}")
                 runOnUiThread {
                     button.isEnabled = true
                     output.text = listOf(
@@ -58,6 +67,8 @@ class SmokeActivity : Activity() {
                 }
             }.start()
         }
+        button.setOnClickListener { runner() }
+        if (auto) App.post({ runner() }, 800)
     }
 
     private fun addField(root: LinearLayout, hint: String): EditText {
@@ -67,5 +78,9 @@ class SmokeActivity : Activity() {
         root.addView(field)
         (field.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin = 8
         return field
+    }
+
+    companion object {
+        private const val TAG = "JarSmoke"
     }
 }
