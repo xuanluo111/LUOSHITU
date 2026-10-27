@@ -258,7 +258,7 @@ public final class Download implements AutoCloseable {
         if (Thread.currentThread().isInterrupted() || canceled || paused) throw new InterruptedIOException();
         if (key != null) throw new IOException("Download already in progress");
         try (this) {
-            Call.Factory client = OkHttp.client();
+            Call.Factory client = OkHttp.client(120000); // 洛视频：慢网适配，jar 下载读超时 120s（1MB 级 jar 弱网约需 100s）
             call = client.newCall(request(client));
             if (canceled || paused) call.cancel();
             if (cancellation != null) cancellation.throwIfCanceled();
