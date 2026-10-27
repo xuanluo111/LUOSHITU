@@ -28,8 +28,10 @@ public class Decoder {
     }
 
     public static Content load(String url, String tag, Auth.Context auth) throws Exception {
+        String cached = DecoderCache.get(url);
+        if (cached != null) return new Content(cached, url, null, true); // 洛视频：慢网适配，命中进程级缓存直接返回
         Request request = new Request.Builder().url(url).tag(tag).tag(Auth.Context.class, auth).build();
-        try (Response res = OkHttp.client().newCall(request).execute()) {
+        try (Response res = OkHttp.client(60000).newCall(request).execute()) { // 洛视频：慢网适配，配置下载 60s 超时
             HttpUrl httpUrl = res.request().url();
             int size = HttpUrl.parse(url).querySize();
             if (httpUrl.querySize() == size) url = httpUrl.toString();

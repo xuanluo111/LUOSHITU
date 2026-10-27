@@ -25,6 +25,7 @@ import com.luoshitu.video.family.LocalFileScan
 import com.luoshitu.video.probe.SiteHealthRunner
 import com.fongmi.android.tv.api.config.VodConfig
 import com.github.catvod.net.Download
+import android.util.Log
 import com.github.catvod.net.OkHttp
 
 /**
@@ -33,7 +34,9 @@ import com.github.catvod.net.OkHttp
  */
 class FamilyConfigActivity : Activity() {
 
-    private lateinit var root: LinearLayout
+    private lateinit var root: android.widget.ScrollView
+    private lateinit var content: LinearLayout
+    private lateinit var statusText: TextView
     private lateinit var pasteUrl: EditText
     private lateinit var configRows: ArrayList<LinearLayout>
     private lateinit var dirList: LinearLayout
@@ -42,17 +45,30 @@ class FamilyConfigActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        root = LinearLayout(applicationContext).apply {
+        content = LinearLayout(applicationContext).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 16)
         }
+        root = android.widget.ScrollView(applicationContext).apply { addView(content) }
         dirList = LinearLayout(applicationContext)
         diagText = TextView(applicationContext).apply { setTextSize(16f); setTextColor(0xFF3C3C3C.toInt()) }
         contactSection = contactSection()
+        statusText = TextView(applicationContext).apply { setTextSize(16f); setTextColor(0xFF1A73E8.toInt()); setPadding(0, 8, 0, 8) }
+        rootAdd(statusText)
         rootAdd(buildSection("粘贴配置地址"))
-        pasteUrl = EditText(applicationContext).apply { setHint("粘贴节目单地址（例如 http://...）") }
+        pasteUrl = EditText(applicationContext).apply {
+            setHint("粘贴节目单地址（例如 http://...）")
+            setSingleLine(true)
+        }
         rootAdd(pasteUrl)
-        pasteUrl.setOnClickListener { importByPaste() }
+        val importBtn = TextView(applicationContext).apply {
+            setText("导 入")
+            setTextSize(20f)
+            setTextColor(0xFF1A73E8.toInt())
+            setPadding(0, 24, 0, 8)
+        }
+        rootAdd(importBtn)
+        importBtn.setOnClickListener { importByPaste() }
         refreshConfigRows()
         rootAdd(buildSection("从 Download/ 目录发现节目单", dirList))
         dirList.setOnClickListener { importByDir() }
@@ -88,13 +104,13 @@ class FamilyConfigActivity : Activity() {
         return LinearLayout(applicationContext).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 16, 24, 16)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 32 }
         }
     }
 
     private fun rootAdd(card: android.view.View) {
         (card.parent as? android.view.ViewGroup)?.removeView(card)
-        root.addView(card)
+        content.addView(card)
     }
 
     private fun contactSection(): LinearLayout {
@@ -130,7 +146,7 @@ class FamilyConfigActivity : Activity() {
         row.addView(TextView(applicationContext).apply { text = name ?: url; setTextSize(18f) })
         val importView = TextView(applicationContext).apply { text = "导入"; setTextSize(18f) }
         val deleteView = TextView(applicationContext).apply { text = "删掉"; setTextSize(18f) }
-        importView.setOnClickListener { importConfig(App.get(), url) }
+        importView.setOnClickListener { showLoading("正在导入该节目单…"); doImport(url) }
         deleteView.setOnClickListener {
             try {
                 AppDatabase.get().getConfigDao().delete(url)
@@ -143,11 +159,16 @@ class FamilyConfigActivity : Activity() {
     }
 
     private fun refreshDiagnosis() {
-        val dao = LsDatabase.get(this)
-        val rows = dao.getSiteHealthDao().findAll()
-        val ok = rows.count { it.ok }
-        val bad = rows.filter { !it.ok }
-        diagText.text = buildDiagnosisText(rows, ok)
+        Thread {
+            try {
+                val dao = LsDatabase.get(this)
+                val rows = dao.getSiteHealthDao().findAll()
+                val ok = rows.count { it.ok }
+                runOnUiThread { diagText.text = buildDiagnosisText(rows, ok) }
+            } catch (t: Throwable) {
+                Log.d("FamilyImport", "diagnosis fail $t")
+            }
+        }.start()
     }
 
     private fun buildDiagnosisText(rows: List<SiteHealthEntity>, okCount: Int): String {
@@ -161,45 +182,83 @@ class FamilyConfigActivity : Activity() {
     }
 
     private fun loadHealthy() {
-        SiteHealthRunner.run(this)
+        Thread { runCatching { SiteHealthRunner.run(this@FamilyConfigActivity) } }.start()
     }
 
     private fun importByPaste() {
         val url = pasteUrl.text.toString().trim()
         if (url.isEmpty()) {
-            Toast.makeText(this, "请先粘贴配置地址", android.view.View.VISIBLE).show()
+            Toast.makeText(this, "请先粘贴配置地址", Toast.LENGTH_LONG).show()
             return
         }
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            Toast.makeText(this, "请粘贴 http 或 https 开头的配置地址", android.view.View.VISIBLE).show()
+            Toast.makeText(this, "请粘贴 http 或 https 开头的配置地址", Toast.LENGTH_LONG).show()
             return
         }
-        showLoading("正在准备节目，请稍候…")
-        runCatching {
-            importConfig(App.get(), url)
-        }
-        showLoading("")
-        loadHealthy()
+        showLoading("正在准备节目，请稍候…（下载与校验约需 1-2 分钟）")
+        Thread {
+            doImport(url)
+        }.start()
     }
 
-    private fun importConfig(ctx: android.content.Context, url: String) {
+    /** 后台线程执行：网络/校验/入库；UI 结果经主线程回调 */
+    private fun doImport(url: String) {
+        fun ui(block: () -> Unit) { runOnUiThread(block) }
+        Log.d("FamilyImport", "doImport start $url")
         try {
-            val text = try { OkHttp.string(url) } catch (t: Throwable) { null } ?: ""
-            if (text.isBlank()) { TextLogger(ElderError.NotConfigFormat("地址返回空内容")); return }
-            val verdict = ContentGuard.check(ContentGuard.ResourceType.CONFIG, text.toByteArray(Charsets.UTF_8))
-            if ((verdict as? ContentGuard.Verdict.Reject) != null) {
-                TextLogger((verdict as ContentGuard.Verdict.Reject).error)
+            // 海外 CDN 握手慢且时好时坏：25s 超时 + 最多 3 次尝试
+            var downloaded: String? = null
+            for (attempt in 1..3) {
+                if (downloaded != null) break
+                try {
+                    OkHttp.newCall(OkHttp.client(25000), url).execute().use { res ->
+                        val body = res.body.string()
+                        Log.d("FamilyImport", "download done attempt=$attempt code=${res.code} len=${body.length}")
+                        if (res.isSuccessful && body.isNotBlank()) downloaded = body
+                    }
+                } catch (t: Throwable) {
+                    Log.d("FamilyImport", "download fail attempt=$attempt $t")
+                }
+            }
+            val finalText: String = downloaded ?: ""
+            if (finalText.isBlank()) {
+                ui { showLoading(""); Toast.makeText(this, "这个地址返回的是空内容，家人确认一下地址对不对", Toast.LENGTH_LONG).show() }
                 return
             }
+            val verdict = ContentGuard.check(ContentGuard.ResourceType.CONFIG, finalText.toByteArray(Charsets.UTF_8))
+            val reject = verdict as? ContentGuard.Verdict.Reject
+            if (reject != null) {
+                ui { showLoading(""); Toast.makeText(this, reject.error.family, Toast.LENGTH_LONG).show() }
+                return
+            }
+            Log.d("FamilyImport", "guard ok, saving config")
+            // 慢网适配：下载成功的配置写入进程级缓存，基座重复加载同 URL 直接命中（DecoderCache）
+            com.github.catvod.utils.DecoderCache.put(url, finalText)
             val config = Config.create(0, url)
-            config.json = text
+            config.json = finalText
             config.name = siteName(url)
             config.save()
-            VodConfig.load(config, com.fongmi.android.tv.impl.Callback())
-            showLoading("")
-            refreshDiagnosis()
+            Log.d("FamilyImport", "config saved, calling VodConfig.load")
+            ui {
+                VodConfig.load(config, object : com.fongmi.android.tv.impl.Callback() {
+                    override fun success() {
+                        showLoading("")
+                        Toast.makeText(this@FamilyConfigActivity, "节目单已就绪，回「找片」看电视", Toast.LENGTH_LONG).show()
+                        Log.d("FamilyImport", "VodConfig success")
+                        loadHealthy()
+                        refreshDiagnosis()
+                    }
+
+                    override fun error(msg: String?) {
+                        Log.d("FamilyImport", "VodConfig error: $msg")
+                        showLoading("")
+                        Toast.makeText(this@FamilyConfigActivity, "节目单还没准备好：${msg ?: "内容方暂时没有回应"}", Toast.LENGTH_LONG).show()
+                        refreshDiagnosis()
+                    }
+                })
+            }
         } catch (t: Throwable) {
-            TextLogger(ElderError.from(t))
+            ui { showLoading(""); Toast.makeText(this, ElderError.from(t).family, Toast.LENGTH_LONG).show() }
         }
     }
 
@@ -214,7 +273,7 @@ class FamilyConfigActivity : Activity() {
             Toast.makeText(this, "发现 ${files.size} 个文件，正在准备节目", android.view.View.VISIBLE).show()
             val json = files.firstOrNull { it.endsWith(".json") || it.endsWith(".txt") } ?: ""
             val jar = files.firstOrNull { it.endsWith(".jar") || it.endsWith(".js") } ?: ""
-            if (!json.isEmpty()) importConfig(App.get(), json)
+            if (!json.isEmpty()) doImport(json)
             if (!jar.isEmpty()) BaseLoader.get().dex(java.io.File(jar).absolutePath)
             showLoading("")
             refreshDiagnosis()
@@ -254,7 +313,7 @@ class FamilyConfigActivity : Activity() {
     }
 
     private fun showLoading(text: String) {
-        pasteUrl.setPadding(0, if (text.isNotEmpty()) 48 else 0, 0, 0)
+        statusText.text = text
     }
 
     private fun siteName(url: String): String = url.substringBeforeLast('/')
