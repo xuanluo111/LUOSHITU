@@ -32,7 +32,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class OkHttp {
 
-    private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(30);
+    private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(60); // 洛视频：慢网适配，全局默认超时 30s→60s（真机实测弱网下 m3u8/配置/图片偶发超 30s）
 
     private ResponseInterceptor responseInterceptor;
     private RequestInterceptor requestInterceptor;
