@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textColor="@color/white"
-            android:textSize="14sp"
+            android:textSize="17sp"
             tools:text="蜘蛛人" />
 
         <com.google.android.material.textview.MaterialTextView
