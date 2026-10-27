@@ -13,10 +13,10 @@ import java.util.zip.ZipInputStream
  */
 object ContentGuard {
 
-    enum class Expected { CONFIG, JAR, JS }
+    enum class ResourceType { CONFIG, JAR, JS }
 
     /** 诊断页记录条目：期望类型 / 实际 content-type / 实际字节数（3.7） */
-    data class Record(val expected: Expected, val contentType: String?, val bytes: Long, val md5: String)
+    data class Record(val expected: ResourceType, val contentType: String?, val bytes: Long, val md5: String)
 
     sealed interface Verdict {
         data class Ok(val record: Record) : Verdict
@@ -26,7 +26,7 @@ object ContentGuard {
     private val ZIP_MAGIC = byteArrayOf(0x50, 0x4B, 0x03, 0x04)
 
     fun check(
-        expected: Expected,
+        expected: ResourceType,
         bytes: ByteArray,
         contentType: String? = null,
         contentLength: Long = -1,
@@ -40,9 +40,9 @@ object ContentGuard {
         }
 
         return when (expected) {
-            Expected.JAR -> checkJar(bytes, contentLength, record)
-            Expected.JS -> checkJs(bytes, record)
-            Expected.CONFIG -> checkConfig(bytes, record)
+            ResourceType.JAR -> checkJar(bytes, contentLength, record)
+            ResourceType.JS -> checkJs(bytes, record)
+            ResourceType.CONFIG -> checkConfig(bytes, record)
         }
     }
 

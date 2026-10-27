@@ -62,7 +62,7 @@ object SiteHealthProbe {
         return try {
             val bytes = OkHttp.string(site.api).toByteArray(Charsets.UTF_8)
             val verdict = com.luoshitu.video.data.config.ContentGuard.check(
-                com.luoshitu.video.data.config.ContentGuard.Expected.JS, bytes,
+                com.luoshitu.video.data.config.ContentGuard.ResourceType.JS, bytes,
             )
             (verdict as? com.luoshitu.video.data.config.ContentGuard.Verdict.Reject)?.error
                 ?: ElderError.ModuleMissing("JS 源需要在装载后真调用验证（QuickJS 内嵌完成于 S3）")
