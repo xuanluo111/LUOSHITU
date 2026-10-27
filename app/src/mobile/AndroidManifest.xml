@@ -44,6 +44,18 @@
         </activity>
 
         <activity
+            android:name="com.luoshitu.video.family.HelpActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Elder">
+        </activity>
+
+        <activity
+            android:name="com.luoshitu.video.family.FamilyConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Elder">
+        </activity>
+
+        <activity
             android:name=".ui.activity.ExternalActivity"
             android:documentLaunchMode="never"
             android:excludeFromRecents="true"
