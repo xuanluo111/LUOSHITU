@@ -11,6 +11,7 @@ import com.fongmi.android.tv.databinding.AdapterQuickBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fongmi.android.tv.utils.ElderText;
 
 public class QuickAdapter extends RecyclerView.Adapter<QuickAdapter.ViewHolder> {
 
@@ -65,7 +66,7 @@ public class QuickAdapter extends RecyclerView.Adapter<QuickAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Vod item = mItems.get(position);
-        holder.binding.name.setText(item.getName());
+        holder.binding.name.setText(ElderText.clean(item.getName()));
         holder.binding.site.setText(item.getSiteName());
         holder.binding.remark.setText(item.getRemarks());
         holder.binding.getRoot().setOnClickListener(v -> listener.onItemClick(item));

@@ -16,6 +16,7 @@ import com.fongmi.android.tv.utils.ResUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fongmi.android.tv.utils.ElderText;
 
 public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.ViewHolder> {
 
@@ -76,7 +77,7 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Site item = mItems.get(position);
         boolean on = !search || change;
-        holder.binding.text.setText(item.getName());
+        holder.binding.text.setText(ElderText.clean(item.getName()));
         holder.binding.text.setEnabled(on);
         holder.binding.text.setFocusable(on);
         holder.binding.text.setSelected(on && item.isSelected());

@@ -222,7 +222,7 @@ public class VodConfig extends BaseConfig {
     }
 
     private void setParses(List<Parse> parses) {
-        if (!parses.isEmpty()) parses.add(0, Parse.god());
+        // 洛视频 3.4 红线：App 本体不内置任何解析；解析列表完全来自配置本体，为空即无解析
         this.parses = parses;
     }
 

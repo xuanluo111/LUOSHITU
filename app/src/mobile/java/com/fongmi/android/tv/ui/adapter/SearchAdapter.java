@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide;
 import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.databinding.AdapterSearchBinding;
 import com.fongmi.android.tv.utils.ImgUtil;
+import com.fongmi.android.tv.utils.ElderText;
 
 public class SearchAdapter extends BaseDiffAdapter<Vod, SearchAdapter.ViewHolder> {
 
@@ -33,7 +34,7 @@ public class SearchAdapter extends BaseDiffAdapter<Vod, SearchAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Vod item = getItem(position);
-        holder.binding.name.setText(item.getName());
+        holder.binding.name.setText(ElderText.clean(item.getName()));
         holder.binding.site.setText(item.getSiteName());
         holder.binding.remark.setText(item.getRemarks());
         holder.binding.site.setVisibility(item.getSiteVisible());

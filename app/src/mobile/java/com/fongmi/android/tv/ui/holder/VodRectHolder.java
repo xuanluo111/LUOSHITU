@@ -8,6 +8,7 @@ import com.fongmi.android.tv.databinding.AdapterVodRectBinding;
 import com.fongmi.android.tv.ui.adapter.VodAdapter;
 import com.fongmi.android.tv.ui.base.BaseVodHolder;
 import com.fongmi.android.tv.utils.ImgUtil;
+import com.fongmi.android.tv.utils.ElderText;
 
 public class VodRectHolder extends BaseVodHolder {
 
@@ -28,7 +29,7 @@ public class VodRectHolder extends BaseVodHolder {
 
     @Override
     public void initView(Vod item) {
-        binding.name.setText(item.getName());
+        binding.name.setText(ElderText.clean(item.getName()));
         binding.year.setText(item.getYear());
         binding.site.setText(item.getSiteName());
         binding.remark.setText(item.getRemarks());

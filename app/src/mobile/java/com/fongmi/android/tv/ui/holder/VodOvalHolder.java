@@ -8,6 +8,7 @@ import com.fongmi.android.tv.databinding.AdapterVodOvalBinding;
 import com.fongmi.android.tv.ui.adapter.VodAdapter;
 import com.fongmi.android.tv.ui.base.BaseVodHolder;
 import com.fongmi.android.tv.utils.ImgUtil;
+import com.fongmi.android.tv.utils.ElderText;
 
 public class VodOvalHolder extends BaseVodHolder {
 
@@ -28,7 +29,7 @@ public class VodOvalHolder extends BaseVodHolder {
 
     @Override
     public void initView(Vod item) {
-        binding.name.setText(item.getName());
+        binding.name.setText(ElderText.clean(item.getName()));
         binding.name.setVisibility(item.getNameVisible());
         binding.getRoot().setOnClickListener(v -> listener.onItemClick(item));
         binding.getRoot().setOnLongClickListener(v -> listener.onLongClick(item));
