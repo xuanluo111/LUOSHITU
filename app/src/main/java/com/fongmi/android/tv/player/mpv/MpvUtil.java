@@ -187,7 +187,7 @@ public final class MpvUtil {
             builder.setSystemCaptionStyle();
         } else {
             CaptionStyleCompat style = SubtitleSetting.getStyle();
-            builder.setDefaultStyle(style.foregroundColor, style.backgroundColor, style.edgeType, style.edgeColor, style.edgeWidth, style.shadowOffset);
+            builder.setDefaultStyle(style.foregroundColor, style.backgroundColor, style.edgeType, style.edgeColor, SubtitleSetting.getEdgeWidth(), SubtitleSetting.getShadow());
         }
     }
 }

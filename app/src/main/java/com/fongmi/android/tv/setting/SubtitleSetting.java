@@ -62,8 +62,8 @@ public class SubtitleSetting {
     private static final float DEFAULT_TEXT_OPACITY = 1.0f;
     private static final float DEFAULT_EDGE_OPACITY = 1.0f;
     private static final float DEFAULT_BACKGROUND_OPACITY = 1.0f;
-    private static final float DEFAULT_EDGE_WIDTH = CaptionStyleCompat.DEFAULT_EDGE_WIDTH;
-    private static final float DEFAULT_SHADOW = CaptionStyleCompat.DEFAULT_SHADOW_OFFSET;
+    private static final float DEFAULT_EDGE_WIDTH = 1.0f; // 官方 CaptionStyleCompat 不携带宽度/阴影，改本地常量（原 fork 桩值）
+    private static final float DEFAULT_SHADOW = 1.0f; // 同上
     private static final float SYSTEM_EDGE_WIDTH = 1.65f;
     private static final CaptionStyleCompat DEFAULT_STYLE = createCaptionStyle(DEFAULT_TEXT_COLOR, DEFAULT_BACKGROUND_COLOR, DEFAULT_EDGE_TYPE, DEFAULT_EDGE_COLOR, DEFAULT_EDGE_WIDTH, DEFAULT_SHADOW);
     private static final int DEFAULT_SECONDARY_MODE = SECONDARY_MODE_DEFAULT;
@@ -312,12 +312,13 @@ public class SubtitleSetting {
         return createCaptionStyle(style.foregroundColor, backgroundColor, style.edgeType, style.edgeColor, SYSTEM_EDGE_WIDTH, DEFAULT_SHADOW);
     }
 
+    // 官方 CaptionStyleCompat 仅含 5 色 + typeface；edgeWidth/shadowOffset 由 SubtitleSetting 单独持久化（MPV 路径直接读取），EXO 渲染使用官方默认
     private static CaptionStyleCompat createCaptionStyle(int foregroundColor, int backgroundColor, int edgeType, int edgeColor, float edgeWidth, float shadowOffset) {
-        return new CaptionStyleCompat(foregroundColor, backgroundColor, Color.TRANSPARENT, edgeType, edgeColor, null, edgeWidth, shadowOffset);
+        return new CaptionStyleCompat(foregroundColor, backgroundColor, Color.TRANSPARENT, edgeType, edgeColor, null);
     }
 
     private static CaptionStyleCompat withTypeface(CaptionStyleCompat style, @Nullable Typeface typeface) {
-        if (typeface != null) style = new CaptionStyleCompat(style.foregroundColor, style.backgroundColor, style.windowColor, style.edgeType, style.edgeColor, typeface, style.edgeWidth, style.shadowOffset);
+        if (typeface != null) style = new CaptionStyleCompat(style.foregroundColor, style.backgroundColor, style.windowColor, style.edgeType, style.edgeColor, typeface);
         return style;
     }
 
