@@ -16,6 +16,4 @@ public class DiscMenuState {
     public int phase = PHASE_IDLE;
     public boolean navigationPlaybackOngoing;
 
-
-
 }

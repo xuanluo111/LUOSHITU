@@ -4,5 +4,8 @@ package androidx.media3.mpvplayer.video;
 public class MpvVideoEqualizer {
 
     public static final MpvVideoEqualizer DEFAULT = new MpvVideoEqualizer();
+    public static MpvVideoEqualizer create(float brightness, float contrast, float saturation, float gamma, float hue) { return new MpvVideoEqualizer(); }
+    public void applyTo(Object builder) { }
+
 	public MpvVideoEqualizer create(float p0, float p1, float p2, float p3, float p4, float p5) { return null; }
 }

@@ -11,7 +11,7 @@ public class MpvAudioFilter {
 		public Builder addVolume(String id, double level) { return this; }
 		public Builder addEqualizer(String id, int band, double value) { return this; }
 		public Builder addLimiter(String id, double limit) { return this; }
-		public Builder addRuntimeChannelMix(String id, float[] mix) { return this; }
+		public Builder addRuntimeChannelMix(String id, float[][] mix) { return this; }
 		public MpvAudioFilter build() { return new MpvAudioFilter(); }
 	}
 

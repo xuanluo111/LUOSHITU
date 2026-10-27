@@ -25,8 +25,8 @@ public class DanmakuConfig {
     public float projectionOffsetYMultiplier;
     public float projectionTransparency;
     public int colorMode;
-    public int durationMs;
-    public int fixedDurationMs;
+    public long durationMs;
+    public long fixedDurationMs;
     public int maxOnScreen;
     public float scrollAreaRatio;
     public float scrollGapRatio;

@@ -5,5 +5,5 @@ import androidx.media3.database.Cache;
 import androidx.media3.datasource.DataSource;
 
 public class ProgressiveIsoCache {
-	public Object withDiskCache(DataSource.Factory p0, Cache p1) { return null; }
+	public static androidx.media3.datasource.DataSource.Factory withDiskCache(androidx.media3.datasource.DataSource.Factory factory, Object cache) { return factory; }
 }

@@ -4,5 +4,5 @@ package androidx.media3.exoplayer.libass;
 import java.io.File;
 
 public class LibassFontFile {
-	public String getFamilyName(File p0) { return null; }
+	public static String getFamilyName(File p0) { return null; }
 }

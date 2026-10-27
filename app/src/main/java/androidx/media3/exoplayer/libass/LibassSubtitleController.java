@@ -6,7 +6,7 @@ import androidx.media3.common.TrackSelectionOverride;
 public class LibassSubtitleController {
     public LibassSubtitleController(Object player, Object session, Object factory, Object output) { }
 	public void close() { }
-	public Object getSubtitleSelectionState() { return null; }
+	public androidx.media3.common.text.SubtitleSelectionState getSubtitleSelectionState() { return null; }
 	public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride p0) { }
 	public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
 }

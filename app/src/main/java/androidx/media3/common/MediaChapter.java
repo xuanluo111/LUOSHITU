@@ -6,5 +6,4 @@ public class MediaChapter {
     public String label;
     public int index;
     public boolean selected;
-    public boolean selected;
 }

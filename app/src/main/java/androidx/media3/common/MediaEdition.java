@@ -6,5 +6,4 @@ public class MediaEdition {
     public String label;
     public int index;
     public boolean selected;
-    public boolean selected;
 }

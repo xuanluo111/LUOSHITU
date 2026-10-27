@@ -2,6 +2,8 @@
 // libass 字幕渲染会话：本产品字幕走内置渲染，桩恒为不可用。
 package androidx.media3.exoplayer.libass;
 
+import androidx.media3.extractor.ExtractorsFactory;
+
 import androidx.media3.exoplayer.Renderer;
 import androidx.media3.extractor.DefaultExtractorsFactory;
 
@@ -16,7 +18,7 @@ public class LibassPlaybackSession {
     public static class MediaComponents {
         public ExtractorsFactory extractorsFactory;
         public androidx.media3.extractor.text.SubtitleParser.Factory subtitleParserFactory;
-    }
+            }
 
     public boolean isAvailable() { return false; }
 

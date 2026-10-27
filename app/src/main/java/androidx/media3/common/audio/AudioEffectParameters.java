@@ -2,9 +2,10 @@
 package androidx.media3.common.audio;
 
 public class AudioEffectParameters {
-    public AudioEffectParameters() { }
     public static final AudioEffectParameters DEFAULT = new AudioEffectParameters();
-	public boolean isCenterGainAvailable(int p0) { return false; }
+    public static boolean isCenterGainAvailable(int channelCount) { return false; }
+    public AudioEffectParameters() { }
+
 	public boolean hasEffect() { return false; }
 	public boolean hasBands() { return false; }
 	public int getChannelMode() { return 0; }

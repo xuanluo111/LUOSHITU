@@ -9,18 +9,16 @@ import androidx.media3.exoplayer.trackselection.DecodeTrackSelector;
 import com.fongmi.android.tv.App;
 
 public class DecoderManager {
-    public DecoderManager(Object audioMode, Object videoMode) { }
+
     public void attach(Player player) { }
     public DecoderMode getAudioMode() { return null; }
     public DecoderMode getVideoMode() { return null; }
     public DecodeTrackSelector createTrackSelector(App p0) { return null; }
     public DecoderManager(Object audioMode, Object videoMode) { }
-    public DecoderManager() { }
-	public DecoderMode getAudioMode() { return null; }
-	public DecoderMode getVideoMode() { return null; }
+
 	public Object selectAudioDecoder(DecoderMode p0) { return null; }
 	public Object selectVideoDecoder(DecoderMode p0) { return null; }
 	public void setDecoderModes(DecoderMode p0, DecoderMode p1) { }
 	public Object detach() { return null; }
-	public DecodeTrackSelector createTrackSelector(App p0) { return null; }
+
 }

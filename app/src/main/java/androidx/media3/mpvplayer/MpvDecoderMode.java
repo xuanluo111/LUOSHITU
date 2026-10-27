@@ -3,6 +3,10 @@ package androidx.media3.mpvplayer;
 import androidx.media3.common.DecoderMode;
 
 public class MpvDecoderMode {
+    public static final MpvDecoderMode AUTO = new MpvDecoderMode();
+    public static final MpvDecoderMode HARDWARE = new MpvDecoderMode();
+    public static final MpvDecoderMode SOFTWARE = new MpvDecoderMode();
+    public static final MpvDecoderMode FFMPEG = new MpvDecoderMode();
 
     public androidx.media3.common.DecoderMode toCommonDecoderMode() { return androidx.media3.common.DecoderMode.AUTO; }
     public MpvDecoderMode fromCommonDecoderMode(DecoderMode p0) { return new MpvDecoderMode(); }

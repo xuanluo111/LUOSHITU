@@ -8,10 +8,15 @@ public class AudioChannelMode {
     public static final int MONO = 2;
     public static final int REVERSE = 3;
 
-    public static boolean canBalance(int mode) { return false; }
-    public static boolean isAuto(int mode) { return mode == AUTO; }
-    public static int clamp(int mode) { return mode; }
     public static int resolve(int mode, int channelCount) { return mode; }
-	public boolean isAvailable(int p0, int p1) { return false; }
-	public int resolve(int p0, int p1) { return 0; }
+    public static int clamp(int mode) { return mode; }
+    public static boolean isAuto(int mode) { return mode == AUTO; }
+    public static boolean canBalance(int mode) { return false; }
+    public static boolean isAvailable(int mode, int channelCount) { return false; }
+    public static boolean isAvailable(int channelCount) { return false; }
+
+
+
+
+
 }

@@ -4,6 +4,8 @@ package androidx.media3.ui.libass;
 import androidx.media3.ui.PlayerView;
 
 public class LibassPlayerViewController {
+    public interface SecondarySubtitleViewConfigurator { void apply(); }
+    public void setSecondarySubtitleViewConfigurator(SecondarySubtitleViewConfigurator configurator) { }
     public LibassPlayerViewController(Object player, Object session, Object controller) { }
 	public void close() { }
 	public boolean bind(PlayerView p0) { return false; }

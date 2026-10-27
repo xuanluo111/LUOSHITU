@@ -8,6 +8,22 @@ import androidx.media3.common.C;
 import androidx.media3.common.DiscMenuController;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
+import androidx.media3.common.Player;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
 import androidx.media3.common.Format;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.text.SubtitleSelectionState;
@@ -58,7 +74,7 @@ import androidx.media3.exoplayer.DecoderMode;
 
 public abstract class MpvPlayer extends DiscMenuController implements Player {
 
-    public boolean isAvailable() { return false; }
+    public static boolean isAvailable() { return false; }
 
     public static final int VIDEO_EFFECTS_SUPPORTED = 0;
     public static final int VIDEO_EFFECTS_UNSUPPORTED_DRM = 1;
@@ -72,12 +88,17 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public Object getAudioEffectsSupport() { return AUDIO_EFFECTS_UNSUPPORTED_PASSTHROUGH; }
     public boolean isVideoSharpnessSupported() { return false; }
     public void setVideoEqualizer(Object p0) { }
-    public void setAudioFilter(MpvAudioFilter p0) { }
+    public boolean setAudioFilter(MpvAudioFilter p0) { return false; }
     public void setSubtitleContentLoader(MpvSubtitleContentLoader loader) { }
     public void setSubtitleOptions(MpvSubtitleOptions p0) { }
 
     public static class Builder {
         public Builder(Object context) { }
+        public Builder setVideoDecoderMode(androidx.media3.mpvplayer.MpvDecoderMode mode) { return this; }
+        public Builder setConfig(Object config) { return this; }
+        public MpvPlayer build() { return null; }
+
+
         public Builder setVulkanEnabled(boolean b) { return this; }
         public Builder setGpuNextEnabled(boolean b) { return this; }
         public Builder setFontsDirectory(String... dirs) { return this; }
@@ -107,7 +128,6 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
         public Builder addEqualizer(Object o) { return this; }
         public Builder addLimiter(Object o) { return this; }
         public Builder addRuntimeChannelMix(Object o) { return this; }
-        public MpvPlayer build() { return null; }
     }
 
     public interface LogListener { void onLogMessage(String prefix, int level, String text); }
@@ -137,7 +157,7 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public void resetSecondaryTextTrackSelection() { }
     public boolean addSubtitle(MediaItem.SubtitleConfiguration p0) { return false; }
     public androidx.media3.exoplayer.DecoderMode getVideoDecoderMode() { return null; }
-    public void setVideoDecoderMode(DecoderMode mode) { }
+
     public void setDiscDataSourceFactory(androidx.media3.datasource.DataSource.Factory p0) { }
     public void setMediaItem(MediaItem p0, long p1) { }
     public Uri getLocalConfigurationUri() { return null; }

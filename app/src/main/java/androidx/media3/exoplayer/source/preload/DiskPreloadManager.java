@@ -24,7 +24,7 @@ public class DiskPreloadManager {
         public static Options builder() { return new Options(); }
         public Options setDurationMs(long ms) { return this; }
         public Options setMaxThreads(int threads) { return this; }
-        public Options build() { return this; }
+
     }
 
     public boolean preload(Object mediaItem) { return false; }
