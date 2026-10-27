@@ -84,7 +84,7 @@ public class DanmakuConfig {
         public Builder setProjectionOffsetYMultiplier(float v) { out.projectionOffsetYMultiplier = v; return this; }
         public Builder setProjectionTransparency(float v) { out.projectionTransparency = v; return this; }
         public Builder setColorMode(int v) { out.colorMode = v; return this; }
-        public Builder setDurationMs(int v) { out.durationMs = v; return this; }
+        public Builder setDurationMs(long v) { out.durationMs = v; return this; }
         public Builder setFixedDurationMs(int v) { out.fixedDurationMs = v; return this; }
         public Builder setMaxOnScreen(int v) { out.maxOnScreen = v; return this; }
         public Builder setScrollAreaRatio(float v) { out.scrollAreaRatio = v; return this; }

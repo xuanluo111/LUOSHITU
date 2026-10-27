@@ -12,7 +12,14 @@ public class SubtitleContent {
     public static final SubtitleContent PARTIAL = new SubtitleContent();
     public static final SubtitleContent TRUNCATED = new SubtitleContent();
 
-    public enum State { LOADING, COMPLETE, ERROR, UNSUPPORTED, PARTIAL, TRUNCATED }
+    public static class State {
+        public static final int LOADING = 0;
+        public static final int COMPLETE = 1;
+        public static final int ERROR = 2;
+        public static final int UNSUPPORTED = 3;
+        public static final int PARTIAL = 4;
+        public static final int TRUNCATED = 5;
+    }
 
     public static class Entry {
         public String image;
@@ -21,7 +28,7 @@ public class SubtitleContent {
         public long endTimeUs;
     }
 
-    public int state = State.COMPLETE;
+    public int state = State.LOADING;
     public List<Entry> entries = Collections.emptyList();
 
     public boolean isEmpty() { return entries.isEmpty(); }

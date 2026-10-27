@@ -9,7 +9,7 @@ import androidx.media3.common.MediaItem;
 import com.fongmi.android.tv.player.subtitle.SubtitleFileContent;
 
 public class SubtitleTranscriptSession {
-	public Object getContent(Format p0, Object p1) { return null; }
+	public androidx.media3.common.text.SubtitleContent getContent(Format p0, long p1) { return null; }
 	public void setContentEnabled(boolean p0) { }
 	public boolean canRetryContent(Format p0) { return false; }
 	public Object retryContent(Format p0) { return null; }

@@ -14,7 +14,4 @@ public class AudioChannelMode {
     public static int resolve(int mode, int channelCount) { return mode; }
 	public boolean isAvailable(int p0, int p1) { return false; }
 	public int resolve(int p0, int p1) { return 0; }
-	public boolean isAvailable(int p0) { return false; }
-	public boolean canBalance(int p0) { return false; }
-	public boolean isAuto(int p0) { return false; }
 }

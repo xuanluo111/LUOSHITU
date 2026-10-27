@@ -10,7 +10,7 @@ public class AudioEffectParameters {
 	public int getChannelMode() { return 0; }
 	public boolean isLoudnessEnabled() { return false; }
 	public int getBoostMillibels() { return 0; }
-	public short[] getEqualizerLevelsMillibels() { return null; }
+	public short[] getEqualizerLevelsMillibels() { return new short[0]; }
 	public boolean shouldLimitOutput(int p0) { return false; }
 	public boolean hasCenterGain(int p0) { return false; }
 	public float[][] getCenterGainFactor() { return null; }

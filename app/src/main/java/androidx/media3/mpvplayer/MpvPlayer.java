@@ -8,6 +8,46 @@ import androidx.media3.common.C;
 import androidx.media3.common.DiscMenuController;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
+import androidx.media3.common.text.SubtitleContent;
+import androidx.media3.common.text.SubtitleOffsets;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.exoplayer.DecoderMode;
+import androidx.media3.mpvplayer.audio.MpvAudioFilter;
 import androidx.media3.common.Player;
 import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.text.SubtitleContent;
@@ -79,13 +119,13 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public Object unloadScript(long p0) { }
     public boolean setStartupScripts(Object scripts) { return false; }
     public String getScriptData(String p0) { return null; }
-    public Object getInputBindings() { return null; }
+    public String getInputBindings() { return null; }
     public Object runScriptBinding(String p0) { return false; }
     public void setAudioOutputListener(AudioOutputListener listener) { }
     public void setAudioFilterListener(AudioFilterListener listener) { }
     public void setVerboseLoggingEnabled(boolean p0) { }
     public Object getAudioChannelCount() { return 0; }
-    public Object getSubtitleSelectionState() { return null; }
+    public SubtitleSelectionState getSubtitleSelectionState() { return null; }
     public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride p0) { return null; }
     public SubtitleOffsets getSubtitleOffsets() { return null; }
     public void setSubtitleOffsets(SubtitleOffsets p0) { }
@@ -103,7 +143,7 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public Uri getLocalConfigurationUri() { return null; }
 	public Object getApplicationLooper(Object p0) { }
 	public void addListener(Listener p0) { }
-	public void removeListener(MpvPlayerEngine p0) { }
+	public void removeListener(Player.Listener listener) { }
 	public void release(Object p0) { }
 	public Object getCurrentMediaItem(Object p0) { }
 	public Object getPlaybackState(Object p0) { }

@@ -18,11 +18,11 @@ public class MpvAudioFilter {
 	public boolean hasEffect() { return false; }
 	public boolean hasBands() { return false; }
 	public boolean hasCenterGain(int band) { return false; }
-	public Object getStability() { return null; }
-	public Object getBalance() { return null; }
-	public Object getBoostMillibels() { return null; }
-	public Object getCenterGainFactor() { return null; }
-	public Object getChannelMode() { return null; }
-	public Object getEqualizerLevelsMillibels() { return null; }
-	public Object getPreampMillibels() { return null; }
+	public float getStability() { return 0f; }
+	public float getBalance() { return 0f; }
+	public float getBoostMillibels() { return 0f; }
+	public float getCenterGainFactor() { return 0f; }
+	public int getChannelMode() { return 0; }
+	public short[] getEqualizerLevelsMillibels() { return new short[0]; }
+	public int getPreampMillibels() { return 0; }
 }

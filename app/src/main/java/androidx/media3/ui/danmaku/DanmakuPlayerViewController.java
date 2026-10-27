@@ -7,7 +7,7 @@ import androidx.media3.ui.PlayerView;
 import okhttp3.OkHttpClient;
 
 public class DanmakuPlayerViewController {
-	public Object getItems() { return null; }
+	public List<Danmaku> getItems() { return java.util.Collections.emptyList(); }
 	public boolean bind(PlayerView p0) { return false; }
 	public void setOkHttpClient(OkHttpClient p0) { }
 	public void setEnabled(boolean p0) { }

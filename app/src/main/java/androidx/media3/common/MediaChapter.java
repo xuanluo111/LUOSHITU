@@ -2,5 +2,9 @@
 package androidx.media3.common;
 
 public class MediaChapter {
+    public long timeUs;
+    public String label;
+    public int index;
+    public boolean selected;
     public boolean selected;
 }
