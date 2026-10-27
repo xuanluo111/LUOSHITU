@@ -3,6 +3,7 @@ package com.luoshitu.video.family
 import android.content.Context
 import android.util.Base64
 import com.github.catvod.utils.Prefers
+import java.security.MessageDigest
 import java.security.SecureRandom
 import java.security.Security
 import javax.crypto.SecretKeyFactory
@@ -25,12 +26,22 @@ object FamilyPassgate {
     }
 
     /** 校验手机号后 4 位是否等于已存储口令的指纹（不可逆） */
+    /** 常量时间比较的口令校验；未设置/格式错一律 false */
     fun verify(phone: String): Boolean {
         val expected = Prefers.getString(PREF_KEY)
         if (expected.isNullOrBlank()) return false
-        val salt = Base64.decode(expected.split('@')[1], Base64.NO_WRAP)
-        return digest(phone).removePrefix("@").equals(Base64.encodeToString(salt, Base64.NO_WRAP))
+        val parts = expected.split('@')
+        if (parts.size != 2) return false
+        return try {
+            val salt = Base64.decode(parts[1], Base64.NO_WRAP)
+            val stored = Base64.decode(parts[0], Base64.NO_WRAP)
+            MessageDigest.isEqual(stored, pbkdf2(phone, salt, ITERATIONS))
+        } catch (t: Throwable) {
+            false
+        }
     }
+
+    fun isSet(): Boolean = !Prefers.getString(PREF_KEY).isNullOrBlank()
 
     fun enter(phone: String): Boolean {
         if (phone.isBlank()) return false

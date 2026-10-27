@@ -57,6 +57,7 @@ class FamilyConfigActivity : Activity() {
         rootAdd(buildSection("体检与诊断（仅家属可见，不弹给老人）", diagText))
         diagText.setOnClickListener { refreshDiagnosis() }
         rootAdd(buildSection("联系家人（「遇到问题？点这里」时显示）", contactSection))
+        rootAdd(buildSection("家属口令（保护本页：建议设为手机号后 4 位）", passgateSection))
     }
 
     private fun buildSection(title: String, dirList: LinearLayout): LinearLayout {
@@ -210,6 +211,32 @@ class FamilyConfigActivity : Activity() {
             showLoading("")
             refreshDiagnosis()
         }
+    }
+
+    private fun passgateSection(): android.view.View {
+        val section = LinearLayout(applicationContext).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24, 16, 24, 16)
+        }
+        val input = EditText(applicationContext).apply { setHint("设置口令（如手机号后 4 位）") }
+        section.addView(input)
+        val btn = TextView(applicationContext).apply {
+            setText("设置口令")
+            setTextSize(18f)
+            setTextColor(0xFF1A73E8.toInt())
+            setPadding(0, 16, 0, 0)
+        }
+        btn.setOnClickListener {
+            val value = input.text.toString().trim()
+            if (value.isEmpty()) {
+                Toast.makeText(this, "先输入口令内容", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            FamilyPassgate.enter(value)
+            Toast.makeText(this, "口令已保存，下次从「我的」长按标题进入需要口令", Toast.LENGTH_LONG).show()
+        }
+        section.addView(btn)
+        return section
     }
 
     private fun saveContact() {

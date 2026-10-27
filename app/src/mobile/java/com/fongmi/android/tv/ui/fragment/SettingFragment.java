@@ -1,9 +1,11 @@
 package com.fongmi.android.tv.ui.fragment;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +24,7 @@ import com.fongmi.android.tv.databinding.FragmentSettingBinding;
 import com.fongmi.android.tv.db.BackupManager;
 import com.fongmi.android.tv.event.ConfigEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
+import com.luoshitu.video.family.FamilyPassgate;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.impl.ConfigListener;
 import com.fongmi.android.tv.impl.LiveListener;
@@ -140,6 +143,40 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
         mBinding.wallRefresh.setOnClickListener(this::setWallRefresh);
         mBinding.wallRefresh.setOnLongClickListener(this::onWallHistory);
         mBinding.settingToolbar.setOnMenuItemClickListener(this::onMenuItemClick);
+        // 洛视频 F1：家属模式隐蔽入口（长按标题，老人不可达；不靠提示拦截）——口令验证后进入
+        mBinding.settingToolbar.setOnLongClickListener(this::onFamilyEntry);
+    }
+
+    private boolean onFamilyEntry(View view) {
+        if (!FamilyPassgate.INSTANCE.isSet()) {
+            openFamilyConfig();
+            return true;
+        }
+        verifyFamilyPassgate();
+        return true;
+    }
+
+    private void verifyFamilyPassgate() {
+        android.widget.EditText input = new android.widget.EditText(requireActivity());
+        input.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+        input.setHint("输入手机号后 4 位");
+        int pad = (int) (getResources().getDisplayMetrics().density * 24);
+        input.setPadding(pad, pad / 2, pad, pad / 2);
+        new MaterialAlertDialogBuilder(requireActivity())
+                .setTitle("家属入口")
+                .setMessage("请输入家属手机号后 4 位")
+                .setView(input)
+                .setPositiveButton("确定", (d, w) -> {
+                    String phone = input.getText().toString().trim();
+                    if (FamilyPassgate.INSTANCE.verify(phone)) openFamilyConfig();
+                    else Toast.makeText(requireActivity(), "不对哦，再想想", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private void openFamilyConfig() {
+        startActivity(new Intent(requireActivity(), com.luoshitu.video.family.FamilyConfigActivity.class));
     }
 
     private boolean onMenuItemClick(MenuItem item) {
