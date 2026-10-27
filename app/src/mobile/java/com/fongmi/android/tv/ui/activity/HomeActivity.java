@@ -44,6 +44,7 @@ import com.fongmi.android.tv.ui.fragment.SettingDecodeFragment;
 import com.fongmi.android.tv.ui.fragment.SettingFragment;
 import com.fongmi.android.tv.ui.fragment.SettingPlayerFragment;
 import com.fongmi.android.tv.ui.fragment.SettingPreloadFragment;
+import com.fongmi.android.tv.ui.fragment.HelpFragment;
 import com.fongmi.android.tv.ui.fragment.VodFragment;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.PermissionUtil;
@@ -146,6 +147,7 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
             case 4 -> SettingPreloadFragment.newInstance();
             case 5 -> SettingDecodeFragment.newInstance();
             case 6 -> ModuleFragment.newInstance();
+            case 7 -> HelpFragment.newInstance();
             default -> null;
         };
     }
@@ -201,6 +203,7 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
     private void setNavigation() {
         mBinding.navigation.getMenu().findItem(R.id.vod).setVisible(true);
         mBinding.navigation.getMenu().findItem(R.id.setting).setVisible(true);
+        mBinding.navigation.getMenu().findItem(R.id.help).setVisible(true);
         mBinding.navigation.getMenu().findItem(R.id.live).setVisible(LiveConfig.hasUrl());
     }
 
@@ -251,6 +254,7 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.setting) return mManager.change(1);
         if (item.getItemId() == R.id.vod) return mManager.change(0);
+        if (item.getItemId() == R.id.help) return mManager.change(7);
         if (item.getItemId() == R.id.live) return openLive();
         return false;
     }
@@ -282,6 +286,8 @@ public class HomeActivity extends BaseActivity implements NavigationBarView.OnIt
             change(2);
         } else if (mManager.isVisible(3) || mManager.isVisible(2) || mManager.isVisible(6)) {
             change(1);
+        } else if (mManager.isVisible(7)) {
+            change(0);
         } else if (mManager.isVisible(1)) {
             change(0);
         } else if (mManager.canBack(0)) {

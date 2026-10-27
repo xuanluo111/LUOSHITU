@@ -27,7 +27,16 @@ public class FragmentStateManager {
     public boolean change(int position) {
         String tag = getTag(position);
         Fragment fragment = fm.findFragmentByTag(tag);
-        fragment = (fragment == null) ? factory.apply(position) : fragment;
+        if (fragment == null) {
+            fragment = factory.apply(position);
+        } else {
+            // 洛视频 A25/A39：覆盖安装后 FragmentManager 恢复的旧 tag 可能与本版类型错位，校验并重建
+            Fragment fresh = factory.apply(position);
+            if (!fresh.getClass().equals(fragment.getClass())) {
+                fm.beginTransaction().remove(fragment).commitNowAllowingStateLoss();
+                fragment = fresh;
+            }
+        }
         FragmentTransaction ft = fm.beginTransaction().setTransition(TRANSIT_FRAGMENT_OPEN);
         if (fm.findFragmentByTag(tag) == null) ft.add(container.getId(), fragment, tag);
         Fragment current = fm.getPrimaryNavigationFragment();
