@@ -140,6 +140,7 @@ public class PlaySpec {
 
     public String getFormat() {
         if ((format == null || format.isEmpty()) && url != null && url.contains("/proxy/mpd/")) return MimeTypes.APPLICATION_MPD;
+        if ((format == null || format.isEmpty()) && url != null && url.contains("do=m3u8")) return MimeTypes.APPLICATION_M3U8; // 洛视频：内置 m3u8 代理地址按 HLS 识别(与 /proxy/mpd/ 同法)
         return format;
     }
 
