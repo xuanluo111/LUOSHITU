@@ -41,7 +41,13 @@ object PathResolver {
         return buildString {
             append(root)
             segments.forEach { append('/').append(it) }
-            append('/').append(ref)
+            if (ref.endsWith("/")) {
+                // 相对路径指向目录时，把配置文件落在该目录下（保持与 base 一致）
+                append('/').append(ref.removeSuffix("/"))
+                append("/config.json")
+            } else {
+                append('/').append(ref)
+            }
         }
     }
 }

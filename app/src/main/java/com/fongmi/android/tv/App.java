@@ -102,7 +102,7 @@ public class App extends Application implements Application.ActivityLifecycleCal
     }
 
     private void initRuntime() {
-        MpvLibrary.setLibraryLoader(MpvUtil::loadRuntime);
+        // 洛视频降级：MpvLibrary 不启用，跳过 setLibraryLoader
         RuntimeModule.refresh();
         cleanRuntime();
         RuntimeReceiver.register(this);

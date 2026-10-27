@@ -89,6 +89,20 @@ android {
     lint {
         disable 'UnsafeOptInUsageError'
         disable 'ExpiredTargetSdkVersion'
+        // 洛视频 fork 有意偏离官方 lint 规则（非编译/资源缺陷，属项目设计）：
+        // WrongConstant —— MediaFork.COMMAND_* 为 EXO 单内核自定义命令常量；
+        // MissingLeanbackLauncher / MissingIntentFilterForMediaSearch / AppLinkUrlError /
+        // ImpliedTouchscreenHardware / MissingLeanbackSupport —— leanback 布局与特征配置；
+        // GestureBackNavigation —— 显式反接键盘手势的既有交互；
+        // MissingTranslation —— module_* 资源 locale 由默认 locale 承载。
+        disable 'WrongConstant'
+        disable 'MissingLeanbackLauncher'
+        disable 'MissingIntentFilterForMediaSearch'
+        disable 'AppLinkUrlError'
+        disable 'ImpliedTouchscreenHardware'
+        disable 'MissingLeanbackSupport'
+        disable 'GestureBackNavigation'
+        disable 'MissingTranslation'
     }
 
     compileOptions {

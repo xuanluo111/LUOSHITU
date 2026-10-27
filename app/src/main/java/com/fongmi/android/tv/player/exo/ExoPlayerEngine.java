@@ -181,7 +181,7 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
     @Nullable
     public DecoderMode getDecoderMode(@C.TrackType int trackType) {
         androidx.media3.exoplayer.DecoderMode mode = session.decoderMode(trackType);
-        return mode == null ? null : mode.toCommonDecoderMode();
+        return mode == null ? null : (DecoderMode) mode.toCommonDecoderMode();
     }
 
     @Override
@@ -216,7 +216,6 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
                 session.createMediaSource(item), ExoMediaSourceFactory.createDataSourceFactory(this.spec.getHeaders(), this.spec.getAuth()));
         if (source == null) return false;
         endingSource = null; // 洛视频降级：EndTrimMediaSource 为 fork 专有包装，ISO 尾部裁剪不启用
-        if (endingSource != null) source = endingSource;
         effect.clearAudioEffect();
         player.setMediaSource(source, startPositionMs);
         preload.start(player, item);
@@ -227,18 +226,17 @@ public class ExoPlayerEngine implements PlayerEngine, AnalyticsListener {
     public void setEnding(long endingMs) {
         if (spec != null) spec.setEnding(endingMs);
         if (preloadSpec != null) preloadSpec.setEnding(endingMs);
-        if (endingSource != null) endingSource.setEndTrimDurationMs(endingMs);
         if (preloadEndingSource != null) preloadEndingSource.setEndTrimDurationMs(endingMs);
     }
 
     @Override
     public boolean isEndingManaged() {
-        return endingSource != null && endingSource.isEndTrimActive();
+        return false; // 洛视频降级：EndTrim 不启用
     }
 
     @Override
     public long getOriginalDurationMs() {
-        return endingSource == null ? C.TIME_UNSET : endingSource.getOriginalDurationMs();
+        return C.TIME_UNSET; // 洛视频降级：EndTrim 不启用
     }
 
     @Override

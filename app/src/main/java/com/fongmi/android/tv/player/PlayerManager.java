@@ -1138,7 +1138,7 @@ public class PlayerManager implements ParseCallback {
             }
         }
 
-        @Override
+
         public void onDiscMenuStateChanged(@NonNull DiscMenuState state) {
             if (state.phase == DiscMenuState.PHASE_OPENING) {
                 App.removeCallbacks(runnable);
@@ -1164,12 +1164,12 @@ public class PlayerManager implements ParseCallback {
             if (initialize) callback.onTracksChanged();
         }
 
-        @Override
+
         public void onMediaChaptersChanged(@NonNull List<MediaChapter> chapters) {
             callback.onMediaOptionsChanged();
         }
 
-        @Override
+
         public void onMediaEditionsChanged(@NonNull List<MediaEdition> editions) {
             callback.onMediaOptionsChanged();
         }

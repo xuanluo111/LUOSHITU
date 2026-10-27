@@ -28,7 +28,7 @@ public final class SubtitleFileContent implements MpvSubtitleContentLoader {
     public SubtitleContent load(MediaItem item, Uri uri, Format format) throws IOException {
         if (Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
         if (!SUPPORTED_SCHEMES.contains(UriUtil.scheme(uri))) return SubtitleContent.UNSUPPORTED;
-        DataSource.Factory factory = new DefaultDataSource.Factory(App.get(), new OkHttpDataSource.Factory(OkHttp.player()).setDefaultRequestProperties(ExoUtil.extractHeaders(item)));
+        DataSource.Factory factory = new DefaultDataSource.Factory(App.get()); // 洛视频降级：OkHttpDataSource 桩已删除
         return new DefaultSubtitleContentLoader(factory).load(item, uri, format);
     }
 }

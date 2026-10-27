@@ -53,8 +53,8 @@ public class DanmakuConfig {
     public float getProjectionOffsetYMultiplier() { return projectionOffsetYMultiplier; }
     public float getProjectionTransparency() { return projectionTransparency; }
     public int getColorMode() { return colorMode; }
-    public int getDurationMs() { return durationMs; }
-    public int getFixedDurationMs() { return fixedDurationMs; }
+    public long getDurationMs() { return durationMs; }
+    public long getFixedDurationMs() { return fixedDurationMs; }
     public int getMaxOnScreen() { return maxOnScreen; }
     public float getScrollAreaRatio() { return scrollAreaRatio; }
     public float getScrollGapRatio() { return scrollGapRatio; }

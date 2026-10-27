@@ -117,6 +117,7 @@ media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", versi
 media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
 media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3" }
 media3-datasource = { group = "androidx.media3", name = "media3-datasource", version.ref = "media3" }
 media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 media3-extractor = { group = "androidx.media3", name = "media3-extractor", version.ref = "media3" }
@@ -129,7 +130,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 chaquo-python = { id = "com.chaquo.python", version.ref = "python" }
 
 [bundles]
-media3 = ["media3-common", "media3-exoplayer", "media3-exoplayer-hls", "media3-exoplayer-dash", "media3-ui", "media3-datasource", "media3-session", "media3-extractor", "media3-effect", "media3-database"]
+media3 = ["media3-common", "media3-datasource-okhttp", "media3-exoplayer", "media3-exoplayer-hls", "media3-exoplayer-dash", "media3-ui", "media3-datasource", "media3-session", "media3-extractor", "media3-effect", "media3-database"]
 glide = ["glide", "glide-annotations", "glide-avif-integration", "glide-okhttp3-integration"]
 jupnp = ["org-jupnp", "org-jupnp-android", "org-jupnp-support"]
 okhttp = ["okhttp", "okhttp-dnsoverhttps", "okhttp-logging-interceptor"]

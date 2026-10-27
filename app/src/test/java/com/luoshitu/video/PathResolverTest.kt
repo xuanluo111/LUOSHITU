@@ -32,7 +32,7 @@ class PathResolverTest {
     }
 
     @Test fun `base with port and nested dir`() {
-        assertEquals("http://cfg.com:8080/a/b.js", PathResolver.resolve("http://cfg.com:8080/a/c/config.json", "./b.js"))
+        assertEquals("http://cfg.com:8080/a/c/b.js", PathResolver.resolve("http://cfg.com:8080/a/c/config.json", "./b.js"))
     }
 
     @Test fun `absolute path anchors to host`() {

@@ -148,8 +148,7 @@ public class ExoMediaSourceFactory implements MediaSource.Factory {
 
     private MediaSource.Factory createMediaSourceFactory(MediaItem mediaItem) {
         SubtitleTranscript transcript = subtitleTranscriptSession.forMediaItem(mediaItem);
-        ExtractorsFactory extractorsFactory = createDefaultExtractorsFactory().setMp4ClearKeys(
-                LocalClearKeyLicense.parse(mediaItem.localConfiguration.drmConfiguration));
+        ExtractorsFactory extractorsFactory = createDefaultExtractorsFactory(); // 洛视频降级：setMp4ClearKeys 为 fork 扩展，ClearKey 路径不启用
         SubtitleParser.Factory subtitleParserFactory;
         if (libassPlaybackSession.isAvailable()) {
             LibassPlaybackSession.MediaComponents components = libassPlaybackSession.createMediaComponents(mediaItem, extractorsFactory, transcript);

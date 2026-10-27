@@ -10,6 +10,10 @@ import androidx.media3.exoplayer.ExoPlayer;
 public class SubtitleTranscriptSession {
 
     public SubtitleTranscriptSession() { }
+    public void close() { }
+    public void retryContent(Format format) { }
+    public boolean canRetryContent(Format format) { return false; }
+    public void setContentEnabled(boolean enabled) { }
     public void setLoader(Object loader) { }
     public void setPlayer(ExoPlayer player) { }
     public SubtitleTranscript forMediaItem(MediaItem mediaItem) { return null; }

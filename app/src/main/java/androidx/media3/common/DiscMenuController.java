@@ -17,4 +17,5 @@ public class DiscMenuController {
         return false;
     }
     public void close() { }
+    public boolean isStarted() { return false; }
 }

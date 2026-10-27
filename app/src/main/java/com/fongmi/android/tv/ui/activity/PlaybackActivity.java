@@ -423,7 +423,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     protected void onPreloadTransition(Object tag, long oldPositionMs, long oldDurationMs) {
     }
 
-    @Override
+
     public void onDiscMenuStateChanged(@NonNull DiscMenuState state) {
         if (!isOwner()) return;
         updateKeepScreenOn(mController != null && mController.isPlaying());
@@ -681,17 +681,17 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     private void addSeekListener() {
         TimeBar timeBar = getSeekView().getTimeBar();
         timeBar.addListener(new TimeBar.OnScrubListener() {
-            @Override
+
             public void onScrubStart(@NonNull TimeBar timeBar, long position) {
                 PlaybackActivity.this.setScrubbing(true);
             }
 
-            @Override
+
             public void onScrubMove(@NonNull TimeBar timeBar, long position) {
                 PlaybackActivity.this.setScrubbing(true);
             }
 
-            @Override
+
             public void onScrubStop(@NonNull TimeBar timeBar, long position, boolean canceled) {
                 PlaybackActivity.this.onScrubStop(position, canceled);
             }

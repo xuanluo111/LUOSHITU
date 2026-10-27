@@ -376,7 +376,7 @@ public final class ExternalFont {
     private static String readFamilyName(File file) {
         try {
             return LibassFontFile.getFamilyName(file);
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }

@@ -2,7 +2,6 @@
 package androidx.media3.effect;
 
 public class ColorToneAdjustEffect implements androidx.media3.common.Effect {
-    @Override
     public long getEffectId() { return 0; }
 	public void setAdjustment(VideoAdjustment p0) { }
 }

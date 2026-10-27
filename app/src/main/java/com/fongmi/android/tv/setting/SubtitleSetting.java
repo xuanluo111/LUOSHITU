@@ -321,15 +321,12 @@ public class SubtitleSetting {
         return style;
     }
 
-    public static void applyStyle(@Nullable SubtitleView subtitleView) {
+public static void applyStyle(@Nullable SubtitleView subtitleView) {
         if (subtitleView == null) return;
-        subtitleView.reset();
         subtitleView.setStyle(getStyle());
         subtitleView.setApplyEmbeddedStyles(!isStyleForced());
         subtitleView.setApplyEmbeddedFontSizes(true);
-        subtitleView.setBitmapSubtitleBrightness(getBitmapBrightness());
-        if (isScaleApplied()) subtitleView.setTextSizeScale(getAppliedScale());
-        if (isPositionSet()) subtitleView.setBottomPosition(getPosition() / 100.0f);
+        // 洛视频降级：官方 SubtitleView 无 reset/setBitmapSubtitleBrightness/setTextSizeScale/setBottomPosition
     }
 
     public static void resetAdjust() {

@@ -6,31 +6,23 @@ import java.util.List;
 
 public class SubtitleContent {
 
-    public static final SubtitleContent LOADING = new SubtitleContent();
-    public static final SubtitleContent ERROR = new SubtitleContent();
-    public static final SubtitleContent UNSUPPORTED = new SubtitleContent();
-    public static final SubtitleContent PARTIAL = new SubtitleContent();
-    public static final SubtitleContent TRUNCATED = new SubtitleContent();
-
-    public static class State {
-        public static final int LOADING = 0;
-        public static final int COMPLETE = 1;
-        public static final int ERROR = 2;
-        public static final int UNSUPPORTED = 3;
-        public static final int PARTIAL = 4;
-        public static final int TRUNCATED = 5;
-    }
+    public enum State { LOADING, COMPLETE, ERROR, UNSUPPORTED, PARTIAL, TRUNCATED }
 
     public static class Entry {
-        public String image;
+        public boolean image;
         public String text;
         public long startTimeUs;
         public long endTimeUs;
     }
 
-    public int state = State.LOADING;
+    public static final SubtitleContent LOADING = new SubtitleContent(State.LOADING);
+    public static final SubtitleContent UNSUPPORTED = new SubtitleContent(State.UNSUPPORTED);
+
+    public State state;
     public List<Entry> entries = Collections.emptyList();
 
-    public boolean isEmpty() { return entries.isEmpty(); }
+    public SubtitleContent() { this.state = State.LOADING; }
+    public SubtitleContent(State state) { this.state = state; }
 
+    public boolean isEmpty() { return entries.isEmpty(); }
 }

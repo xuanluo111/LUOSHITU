@@ -9,5 +9,5 @@ public class MpvDecoderMode {
     public static final MpvDecoderMode FFMPEG = new MpvDecoderMode();
 
     public androidx.media3.common.DecoderMode toCommonDecoderMode() { return androidx.media3.common.DecoderMode.AUTO; }
-    public MpvDecoderMode fromCommonDecoderMode(DecoderMode p0) { return new MpvDecoderMode(); }
+    public static androidx.media3.exoplayer.DecoderMode fromCommonDecoderMode(DecoderMode p0) { return androidx.media3.exoplayer.DecoderMode.AUTO; }
 }

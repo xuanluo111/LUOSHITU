@@ -69,7 +69,7 @@ final class ExoSubtitleController {
     private void applySecondarySubtitleStyle(SubtitleView subtitleView) {
         SubtitleSetting.applyStyle(subtitleView);
         subtitleView.setBottomPaddingFraction(0.0f);
-        subtitleView.setBottomPosition(getSecondaryBottomPositionFraction());
+        // 洛视频降级：官方 SubtitleView 无 setBottomPosition
     }
 
     private static float getSecondaryBottomPositionFraction() {

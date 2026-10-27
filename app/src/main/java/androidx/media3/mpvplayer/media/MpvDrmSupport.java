@@ -4,5 +4,5 @@ package androidx.media3.mpvplayer.media;
 import androidx.media3.common.MediaItem;
 
 public class MpvDrmSupport {
-	public boolean supports(MediaItem p0) { return false; }
+	public static boolean supports(MediaItem p0) { return false; }
 }

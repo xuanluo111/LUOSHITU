@@ -110,10 +110,8 @@ public final class ExoUtil {
             this.libassPlaybackSession = libassPlaybackSession;
             // 洛视频降级：DecoderManager 注入不启用
             setEnableDecoderFallback(true);
-            setEnableSurfaceControlFrameRetention(true);
-            experimentalSetEnableMediaCodecVideoRendererPrewarming(true);
-            setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON);
-            setDolbyVisionOutputPolicy(DecodeSetting.getDolbyVisionOutputPolicy());
+            // 洛视频降级：setEnableSurfaceControlFrameRetention / setDolbyVisionOutputPolicy 为 fork 扩展，不启用
+            // experimentalSetEnableMediaCodecVideoRendererPrewarming / setExtensionRendererMode 为 fork 扩展，不启用
         }
 
         @Override

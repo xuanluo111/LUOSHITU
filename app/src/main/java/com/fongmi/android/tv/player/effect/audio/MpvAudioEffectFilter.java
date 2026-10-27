@@ -19,7 +19,7 @@ public final class MpvAudioEffectFilter {
         panMix.appendTo(builder);
         appendLoudness(builder, config.isLoudnessEnabled());
         appendStability(builder, config);
-        appendVolume(builder, "boost", config.getBoostMillibels(), hasBands);
+        appendVolume(builder, "boost", config.getBoostMillibelsInt(), hasBands);
         appendVolume(builder, "preamp", config.getPreampMillibels(), hasBands);
         appendEqualizer(builder, config.getEqualizerLevelsMillibels());
         appendLimiter(builder, config.shouldLimitOutput(channelCount));

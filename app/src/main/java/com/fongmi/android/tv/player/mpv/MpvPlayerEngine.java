@@ -197,7 +197,7 @@ public class MpvPlayerEngine implements PlayerEngine, Player.Listener {
     @Nullable
     public DecoderMode getDecoderMode(@C.TrackType int trackType) {
         if (trackType != C.TRACK_TYPE_VIDEO) return null;
-        return player.getVideoDecoderMode().toCommonDecoderMode();
+        return (DecoderMode) player.getVideoDecoderMode().toCommonDecoderMode();
     }
 
     @Override
