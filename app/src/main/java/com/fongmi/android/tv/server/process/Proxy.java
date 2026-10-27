@@ -32,6 +32,8 @@ public class Proxy implements Process {
             Map<String, String> params = session.getParms();
             params.putAll(session.getHeaders());
             params.putAll(files);
+            // 洛视频：通用 m3u8/ts 代理内置实现，不依赖加壳 jar 的 proxy（其内部异常会 500 空响应）
+            if (MediaProxy.matches(params)) return createResponse(MediaProxy.handle(params));
             return createResponse(BaseLoader.get().proxy(params));
         } catch (Throwable e) {
             RuntimeModule.MissingException missing = RuntimeModule.MissingException.find(e);
