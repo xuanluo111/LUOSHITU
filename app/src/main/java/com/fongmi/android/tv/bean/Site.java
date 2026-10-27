@@ -217,6 +217,10 @@ public class Site implements Parcelable {
         return type == null ? 0 : type;
     }
 
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
     public Integer getHide() {
         return hide == null ? 0 : hide;
     }

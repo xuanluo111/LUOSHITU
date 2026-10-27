@@ -108,6 +108,8 @@ sealed class ElderError(
     )
 
     companion object {
+        fun unknown(detail: String): Unknown { return Unknown(detail) }
+
         fun from(t: Throwable): ElderError = when (t) {
             is ElderError -> t
             is java.net.UnknownHostException -> DnsFail(t.message ?: "")
