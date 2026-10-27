@@ -31,6 +31,7 @@ import com.fongmi.android.tv.ui.adapter.CollectAdapter;
 import com.fongmi.android.tv.ui.adapter.SearchAdapter;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 import com.fongmi.android.tv.ui.custom.CustomScroller;
+import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
 
 import java.util.List;
@@ -43,6 +44,8 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
     private CustomScroller mScroller;
     private SiteViewModel mViewModel;
     private List<Site> mSites;
+    private int pendingSources;
+    private int failedSources;
 
     public static CollectFragment newInstance(String keyword) {
         Bundle args = new Bundle();
@@ -129,6 +132,8 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
 
     private void search() {
         if (mSites.isEmpty()) return;
+        pendingSources = mSites.size();
+        failedSources = 0;
         mCollectAdapter.setItems(List.of(Collect.all()), () -> mViewModel.searchContent(mSites, getKeyword(), false));
     }
 
@@ -139,10 +144,25 @@ public class CollectFragment extends BaseFragment implements MenuProvider, Colle
     }
 
     private void setCollect(Result result) {
-        if (result == null || result.getList().isEmpty()) return;
+        if (result == null || result.getList().isEmpty()) {
+            // 洛视频 3.2：多源聚合搜索的失败/空结果对老人说人话，不静默
+            if (result != null && result.hasMsg()) failedSources++;
+            else if (result != null) failedSources++;
+            onSourceSettled();
+            return;
+        }
         if (mCollectAdapter.getPosition() == 0) mSearchAdapter.addAll(result.getList());
         mCollectAdapter.add(Collect.create(result.getList()));
         mCollectAdapter.add(result.getList());
+        onSourceSettled();
+    }
+
+    private void onSourceSettled() {
+        if (pendingSources <= 0) return;
+        pendingSources--;
+        if (pendingSources == 0 && failedSources > 0) {
+            Notify.show(failedSources + " 个来源没找到，内容可能不全；家人可在家属模式里体检节目单");
+        }
     }
 
     private void setSearch(Result result) {
