@@ -5,7 +5,8 @@ import org.json.JSONObject;
 
 public class Github {
 
-    private static final String REPO = "FongMi/Release";
+    // 更新源指向本项目自己的 Release，不再连接上游；发布时 tag 需形如 vX.Y.Z，资产名 <flavor>-<abi>.apk
+    private static final String REPO = "xuanluo111/LUOSHITU";
 
     public static String getReleases() {
         return "https://api.github.com/repos/" + REPO + "/releases?per_page=100";

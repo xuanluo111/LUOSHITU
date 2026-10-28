@@ -284,6 +284,7 @@
     <string name="setting_on">开</string>
 
     <string name="module_bdj">BD-J</string>
+    <string name="module_thunder">迅雷</string>
     <string name="module_version">版本：%1$s</string>
     <string name="module_installing">安装中…</string>
     <string name="module_cancelling">取消中…</string>
@@ -397,6 +398,7 @@
     <string name="error_play_url">播放地址加载失败</string>
     <string name="error_play_flag">暂无线路数据</string>
     <string name="error_play_timeout">连接超时</string>
+    <string name="error_request_timeout">请求超时，请检查网络或站点</string>
     <string name="bdj_preparing">正在准备 BD-J 菜单</string>
     <string name="error_bdj_prepare">ISO 菜单检查或 BD-J 准备失败：%1$s</string>
     <string name="error_audio_effect_unsupported">当前播放方式不支持音质设置</string>
@@ -440,6 +442,16 @@
     <string name="none">无</string>
     <string name="times">倍</string>
     <string name="lines">行</string>
+
+    <string-array name="select_engine">
+        <item>EXO</item>
+        <item>MPV</item>
+    </string-array>
+
+    <string-array name="select_render">
+        <item>Surface</item>
+        <item>Texture</item>
+    </string-array>
 
     <string-array name="select_dolby_vision_output">
         <item>自动</item>

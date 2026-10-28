@@ -2,7 +2,7 @@ name: Publish website to GitHub Pages
 
 on:
   push:
-    branches: [fongmi]
+    branches: [main]
     paths:
       - "website/**"
       - ".github/workflows/pages.yml"

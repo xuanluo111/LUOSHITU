@@ -18,5 +18,6 @@ public class SubtitleTranscriptSession {
     public void setPlayer(ExoPlayer player) { }
     public SubtitleTranscript forMediaItem(MediaItem mediaItem) { return null; }
     public void setPreloadMediaItem(MediaItem mediaItem) { }
-    public SubtitleContent getContent(Format format, long offsetMs) { return null; }
+    // 洛视频：PlaybackContentPanel 直接读 content.state，返回 null 会 NPE。
+    public SubtitleContent getContent(Format format, long offsetMs) { return SubtitleContent.UNSUPPORTED; }
 }

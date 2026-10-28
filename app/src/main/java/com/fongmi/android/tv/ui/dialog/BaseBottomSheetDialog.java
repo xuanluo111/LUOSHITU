@@ -2,6 +2,7 @@ package com.fongmi.android.tv.ui.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,11 @@ public abstract class BaseBottomSheetDialog extends BottomSheetDialogFragment {
     private void setSheet(BottomSheetDialog dialog) {
         FrameLayout sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheet == null) return;
+        // 洛视频：material 给 sheet 的 style 带 640dp maxWidth，而外层 FrameLayout 子项默认 start 对齐，
+        // 平板横屏（屏宽 > 640dp）上整块面板靠左、右侧露出窗口背景。显式水平居中，竖屏窄屏不受影响。
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) sheet.getLayoutParams();
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        sheet.setLayoutParams(params);
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(sheet);
         setHeight(sheet, behavior);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);

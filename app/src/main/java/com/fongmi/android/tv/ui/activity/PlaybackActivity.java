@@ -679,6 +679,22 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
     }
 
     private void addSeekListener() {
+        // 洛视频：进度条整块由 PlayerSeekView 接管触摸（DefaultTimeBar 自带的判定范围只有几十像素，手指点不准）。
+        getSeekView().setOnSeekListener(new PlayerSeekView.OnSeekListener() {
+
+            @Override
+            public void onScrubbing(boolean scrubbing) {
+                PlaybackActivity.this.setScrubbing(scrubbing);
+            }
+
+            @Override
+            public void onSeek(long position) {
+                performSeek(position);
+                // 洛视频：与键盘/遥控路径（onScrubStop）对齐——触摸拖动松手后同样恢复播放，
+                // 否则暂停状态下手指拖完停住，遥控器拖完却续播，行为不一致。
+                if (!isWebPlaybackActive() && mController != null && mController.isCommandAvailable(Player.COMMAND_PLAY_PAUSE)) mController.setPlayWhenReady(true);
+            }
+        });
         TimeBar timeBar = getSeekView().getTimeBar();
         timeBar.addListener(new TimeBar.OnScrubListener() {
 
@@ -702,10 +718,17 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
         return scrubbing;
     }
 
+    /** 洛视频：原生播放靠 MediaController.seekTo（跨进程），网页播放交给 WebView 自己跳。 */
+    private void performSeek(long position) {
+        if (position == C.TIME_UNSET) return;
+        if (isWebPlaybackActive()) webView.seekVideo(position);
+        else if (mController != null && mController.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)) mController.seekTo(position);
+    }
+
     protected void onScrubStop(long position, boolean canceled) {
         if (!canceled) {
-            if (isWebPlaybackActive()) webView.seekVideo(position);
-            else if (mController != null && mController.isCommandAvailable(Player.COMMAND_PLAY_PAUSE)) mController.setPlayWhenReady(true);
+            performSeek(position);
+            if (!isWebPlaybackActive() && mController != null && mController.isCommandAvailable(Player.COMMAND_PLAY_PAUSE)) mController.setPlayWhenReady(true);
         }
         setScrubbing(false);
     }
@@ -1060,12 +1083,21 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
 
     @Override
     public void onIsPlayingChanged(boolean isPlaying) {
-        if (!isOwner()) return;
+        if (!isOwner() || isWindowGone()) return;
         updateKeepScreenOn(isPlaying);
         onPlayingChanged(isPlaying);
     }
 
+    /**
+     * 洛视频：MediaController 的回调可能晚于 Activity 销毁到达。此时 PhoneWindow 的 decor 已被置空，
+     * 再碰 Window（addFlags/clearFlags → updateViewLayout）会在 resolveLayoutParams 里 NPE 闪退。
+     */
+    private boolean isWindowGone() {
+        return isFinishing() || isDestroyed();
+    }
+
     private void updateKeepScreenOn(boolean isPlaying) {
+        if (isWindowGone()) return;
         int flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
         boolean screenOn = (getWindow().getAttributes().flags & flag) != 0;
         boolean keepScreenOn = isPlaying || isDiscMenuActive();

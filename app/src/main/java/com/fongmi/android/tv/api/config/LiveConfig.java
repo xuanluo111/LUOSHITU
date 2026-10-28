@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.api.config;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.fongmi.android.tv.api.LiveApi;
 import com.fongmi.android.tv.api.loader.BaseLoader;
@@ -16,12 +17,14 @@ import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.ConfigEvent;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.setting.LiveSetting;
+import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.bean.Header;
 import com.github.catvod.bean.Proxy;
 import com.github.catvod.utils.Auth;
 import com.github.catvod.utils.Decoder;
 import com.github.catvod.utils.Json;
+import com.github.catvod.utils.RuntimeModule;
 import com.github.catvod.utils.UriUtil;
 import com.google.gson.JsonObject;
 
@@ -186,7 +189,15 @@ public class LiveConfig extends BaseConfig {
 
     private void initLive(Config config, JsonObject object) {
         String spider = Json.safeString(object, "spider");
-        BaseLoader.get().parseJar(spider, false);
+        try {
+            BaseLoader.get().parseJar(spider, false);
+        } catch (RuntimeModule.MissingException e) {
+            // 洛视频：缺运行时模块是可操作错误（去模块管理安装），吞掉会让用户误以为源坏了
+            Notify.show(Notify.getError(e));
+        } catch (Throwable e) {
+            // 洛视频：jar 拉不下来也要把直播列表渲染出来，不能让整页跟着陪葬
+            Log.e("LiveConfig", "parseJar failed: " + spider, e);
+        }
         setLives(Json.safeListElement(object, "lives").stream().map(e -> Live.objectFrom(e, spider)).distinct().collect(Collectors.toCollection(ArrayList::new)));
         Map<String, Live> items = Live.findAll().stream().collect(Collectors.toMap(Live::getName, Function.identity()));
         getLives().forEach(live -> live.sync(items.get(live.getName())));

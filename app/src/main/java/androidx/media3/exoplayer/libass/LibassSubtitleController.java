@@ -2,11 +2,13 @@
 package androidx.media3.exoplayer.libass;
 
 import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.SubtitleSelectionState;
 
 public class LibassSubtitleController {
     public LibassSubtitleController(Object player, Object session, Object factory, Object output) { }
 	public void close() { }
-	public androidx.media3.common.text.SubtitleSelectionState getSubtitleSelectionState() { return null; }
+	// 洛视频：TrackDialog 与 SubtitleSettingPanel 拿到返回值后直接读字段，返回 null 会 NPE 闪退，必须给默认状态。
+	public SubtitleSelectionState getSubtitleSelectionState() { return SubtitleSelectionState.EMPTY; }
 	public void setSecondaryTextTrackSelectionOverride(TrackSelectionOverride p0) { }
 	public void setSecondaryTextTrackAutoSelectionEnabled(boolean p0) { }
 }

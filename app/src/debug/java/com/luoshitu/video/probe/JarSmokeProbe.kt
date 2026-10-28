@@ -5,7 +5,8 @@ import com.fongmi.android.tv.api.loader.BaseLoader
 import com.github.catvod.crawler.SpiderNull
 
 /**
- * S1 冒烟闸门工具：加壳 jar 在 mobile flavor 下完成 Init.init → ≥1 个 csp_ 源真调用返回内容。
+ * S1 冒烟闸门工具：加壳 jar 在 debug 构建下完成 Init.init → ≥1 个 csp_ 源真调用返回内容。
+ * 放在 debug 源集（mobile / leanback 两种变体共享），与 SmokeActivity 同源集，避免 leanback 变体编译期缺失。
  * 在真机（arm64）上由家属模式（S2 接入 UI）或 adb 触发；jar 地址由家属填入，App 不内置任何配置（合规红线）。
  * x86_64 模拟器上加壳源全灭属预期（3.11-C），该环境不得用于冒烟判定。
  */

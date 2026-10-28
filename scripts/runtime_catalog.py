@@ -32,7 +32,7 @@ PYTHON_ASSETS = ("app.imy", "build.json", "bootstrap.imy", "stdlib-common.imy", 
 JAVA_ENTRIES = {"python": "com.fongmi.chaquo.RuntimeEntry", "nodejs": "com.fongmi.nodejs.RuntimeEntry", "quickjs": "com.fongmi.quickjs.RuntimeEntry", "thunder": "com.xunlei.downloadlib.RuntimeEntry"}
 BDJ_ARCHIVE = "assets/bdj/runtime.zip"
 BDJ_LIBRARIES = ("libjava.so", "libverify.so", "libzip.so", "libnet.so", "libnio.so", "server/libjvm.so")
-DEFAULT_URL = "https://github.com/FongMi/Release/releases/download/module"
+DEFAULT_URL = "https://github.com/xuanluo111/LUOSHITU/releases/download/module"
 
 
 def digest(stream):

@@ -67,6 +67,29 @@ public class Task {
         return largeExecutor.submit(task);
     }
 
+    // 洛视频：大任务（如 jar 下载）与小的加载任务共池时，45s 超时预算会把排队时间也算进去，
+    // 极端情况下全程耗在队列里 → 从未真正下载却误标失败。largeExecutor 重载避开排队。
+    public static <T> ListenableFuture<T> submitLarge(Callable<T> callable, long timeoutMillis) {
+        SettableFuture<T> result = SettableFuture.create();
+        CallTimeout timeout = new CallTimeout(timeoutMillis);
+        ListenableFutureTask<T> task = ListenableFutureTask.create(() -> {
+            Runnable restore = timeout.enter();
+            try {
+                return callable.call();
+            } finally {
+                restore.run();
+            }
+        });
+        result.addListener(() -> {
+            timeout.close();
+            if (!task.isDone()) task.cancel(true);
+        }, MoreExecutors.directExecutor());
+        Futures.addCallback(task, callback(result::set, result::setException), MoreExecutors.directExecutor());
+        timeout.start(() -> result.setException(new TimeoutException("Task exceeded " + timeoutMillis + " ms")));
+        largeExecutor.execute(task);
+        return result;
+    }
+
     public static void execute(Runnable task) {
         executor.execute(task);
     }

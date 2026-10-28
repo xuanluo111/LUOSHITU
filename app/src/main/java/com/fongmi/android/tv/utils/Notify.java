@@ -20,6 +20,9 @@ import com.fongmi.android.tv.exception.ExtractException;
 import com.github.catvod.utils.RuntimeModule;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
+
 public class Notify {
 
     public static final String DEFAULT = "default";
@@ -54,6 +57,12 @@ public class Notify {
             return ResUtil.getString(R.string.error_module_missing, title);
         }
         for (Throwable current = e; current != null; current = current.getCause()) if (current instanceof ExtractException) return current.getMessage();
+        // 洛视频：请求被 Task 的超时兜底拦截时，这里原来返回 null，界面直接变空白且不弹提示，
+        // 用户完全不知道是网络/站点慢。慢源下这种情况很常见，必须给出明确文案。
+        // Task 兜底抛 j.u.c.TimeoutException，OkHttp 的 call/read 超时抛 SocketTimeoutException，两者都覆盖。
+        for (Throwable current = e; current != null; current = current.getCause()) {
+            if (current instanceof TimeoutException || current instanceof SocketTimeoutException) return ResUtil.getString(R.string.error_request_timeout);
+        }
         return null;
     }
 

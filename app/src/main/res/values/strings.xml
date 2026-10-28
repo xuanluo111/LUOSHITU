@@ -398,7 +398,7 @@
     <string name="error_play_drm">This device does not support the required DRM scheme</string>
     <string name="error_play_url">Unable to load url</string>
     <string name="error_play_flag">No flag data</string>
-    <string name="error_play_timeout">Timed out</string><string name="error_audio_effect_unsupported">Audio settings are unavailable for the current playback mode</string>
+    <string name="error_play_timeout">Timed out</string><string name="error_request_timeout">Request timed out, check network or site</string><string name="error_audio_effect_unsupported">Audio settings are unavailable for the current playback mode</string>
     <string name="bdj_preparing">Preparing BD-J menu</string>
     <string name="error_bdj_prepare">ISO menu check or BD-J setup failed: %1$s</string>
     <string name="error_audio_effect_tunnel">Audio settings are unavailable in tunnel mode</string>

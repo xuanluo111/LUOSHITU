@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.api.config;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.api.loader.BaseLoader;
@@ -13,6 +14,7 @@ import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.event.ConfigEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.Callback;
+import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.bean.Doh;
 import com.github.catvod.bean.Header;
@@ -20,6 +22,7 @@ import com.github.catvod.bean.Proxy;
 import com.github.catvod.runtime.NodeRuntimeApi;
 import com.github.catvod.utils.Decoder;
 import com.github.catvod.utils.Json;
+import com.github.catvod.utils.RuntimeModule;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -197,7 +200,15 @@ public class VodConfig extends BaseConfig {
 
     private void initSite(Config config, JsonObject object) {
         String spider = Json.safeString(object, "spider");
-        BaseLoader.get().parseJar(spider, true);
+        try {
+            BaseLoader.get().parseJar(spider, true);
+        } catch (RuntimeModule.MissingException e) {
+            // 洛视频：缺运行时模块是可操作错误（去模块管理安装），吞掉会让用户误以为源坏了
+            Notify.show(Notify.getError(e));
+        } catch (Throwable e) {
+            // 洛视频：spider.jar 拿不到也照样把站点列表渲染出来，不能让整页跟着陪葬
+            Log.e("VodConfig", "parseJar failed: " + spider, e);
+        }
         setSites(Json.safeListElement(object, "sites").stream().map(e -> Site.objectFrom(e, spider)).distinct().collect(Collectors.toCollection(ArrayList::new)));
         Map<String, Site> items = Site.findAll().stream().collect(Collectors.toMap(Site::getKey, Function.identity()));
         getSites().forEach(site -> site.sync(items.get(site.getKey())));

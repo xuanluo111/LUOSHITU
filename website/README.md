@@ -26,10 +26,10 @@ npm start
 
 ## GitHub Pages
 
-網站原始碼位於 `FongMi/TV` 的 `website/`，正式網址為 [影視TV 使用與開發指南](https://fongmi.github.io/TV/)。不需要另外建立網站儲存庫。
+網站原始碼位於本儲存庫的 `website/`，正式網址為 [使用與開發指南](https://xuanluo111.github.io/LUOSHITU/)。不需要另外建立網站儲存庫。
 
 1. 在 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。
-2. 將 `website/` 或 `.github/workflows/pages.yml` 的更新推送至 `fongmi`，或在 Actions 手動執行 **Publish website to GitHub Pages**。
+2. 將 `website/` 或 `.github/workflows/pages.yml` 的更新推送至 `main`，或在 Actions 手動執行 **Publish website to GitHub Pages**。
 3. 流程在 `website/` 安裝依賴、執行 Lint、型別檢查與靜態建置，再發布 `website/out/`。
 
 網站輸出不含 Android 專案、`node_modules` 或本機環境檔；只修改 App 程式碼不會觸發網站發布。
@@ -43,12 +43,12 @@ npm start
 PowerShell 子目錄測試：
 
 ```powershell
-$env:SITE_URL = 'https://fongmi.github.io/TV/'
+$env:SITE_URL = 'https://xuanluo111.github.io/LUOSHITU/'
 npm run build
 npm start
 ```
 
-預覽網址此時為 `http://localhost:3000/TV/`。`SITE_URL` 是建置時設定，`npm start` 會自動使用建置結果的路徑，不需要再次設定。更換網域或路徑需重新建置並重新啟動預覽。完成後以 `Remove-Item Env:SITE_URL` 清除設定。
+預覽網址此時為 `http://localhost:3000/LUOSHITU/`。`SITE_URL` 是建置時設定，`npm start` 會自動使用建置結果的路徑，不需要再次設定。更換網域或路徑需重新建置並重新啟動預覽。完成後以 `Remove-Item Env:SITE_URL` 清除設定。
 
 ## 維護位置
 

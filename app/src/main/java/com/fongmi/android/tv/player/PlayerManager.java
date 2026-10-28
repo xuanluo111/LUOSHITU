@@ -75,6 +75,8 @@ import java.util.UUID;
 
 public class PlayerManager implements ParseCallback {
 
+    private static final int MAX_TIMEOUT_EXTENSIONS = 2;
+
     private final PlayerEffectManager effects;
     private final Runnable runnable;
     private final Callback callback;
@@ -98,6 +100,8 @@ public class PlayerManager implements ParseCallback {
     private boolean refreshAttempted;
     private boolean mpvDrmExoFallback;
     private boolean initTrack;
+    private int timeoutExtensions;
+    private long timeoutBufferedMs = C.TIME_UNSET;
     private final List<Track> pendingTrackRestore = new ArrayList<>();
 
     public PlayerManager(Callback callback) {
@@ -146,8 +150,14 @@ public class PlayerManager implements ParseCallback {
 
     private void beginPlaybackAttempt(boolean newMedia) {
         if (newMedia || playbackId == null) resetPlaybackAttempt();
+        resetPlayTimeout();
         playbackAttempt++;
         logPlaybackAttempt();
+    }
+
+    private void resetPlayTimeout() {
+        timeoutExtensions = 0;
+        timeoutBufferedMs = C.TIME_UNSET;
     }
 
     private void resetPlaybackAttempt() {
@@ -381,6 +391,8 @@ public class PlayerManager implements ParseCallback {
         change.run();
         if (recover && player.getPlaybackState() == Player.STATE_IDLE) {
             player.prepare();
+            // 洛视频：恢复窗口要给满续期预算，否则上一轮用光 2 次续期后这里只剩 15s 判死。
+            resetPlayTimeout();
             App.post(runnable, Constant.TIMEOUT_PLAY);
         }
         callback.onDecodeChanged();
@@ -475,12 +487,15 @@ public class PlayerManager implements ParseCallback {
         if (engine != null) engine.applySubtitleStyle();
     }
 
+    // 洛视频：补齐桩的引擎实现可能返回 null，调用方（TrackDialog / SubtitleSettingPanel）不判空，这里统一兜底。
     public SubtitleSelectionState getSubtitleSelectionState() {
-        return engine == null ? SubtitleSelectionState.EMPTY : engine.getSubtitleSelectionState();
+        SubtitleSelectionState state = engine == null ? null : engine.getSubtitleSelectionState();
+        return state == null ? SubtitleSelectionState.EMPTY : state;
     }
 
     public SubtitleContent getSubtitleContent(TrackSelectionOverride selection) {
-        return engine == null ? SubtitleContent.UNSUPPORTED : engine.getSubtitleContent(selection);
+        SubtitleContent content = engine == null ? null : engine.getSubtitleContent(selection);
+        return content == null ? SubtitleContent.UNSUPPORTED : content;
     }
 
     public boolean canRetrySubtitleContent(Format format) {
@@ -676,7 +691,8 @@ public class PlayerManager implements ParseCallback {
     }
 
     public SubtitleOffsets getSubtitleOffsets() {
-        return engine == null ? SubtitleOffsets.ZERO : engine.getSubtitleOffsets();
+        SubtitleOffsets offsets = engine == null ? null : engine.getSubtitleOffsets();
+        return offsets == null ? SubtitleOffsets.ZERO : offsets;
     }
 
     public void setSubtitleOffsets(SubtitleOffsets offsets) {
@@ -772,8 +788,37 @@ public class PlayerManager implements ParseCallback {
     }
 
     private void onPlayTimeout() {
+        if (extendPlayTimeout()) return;
+        logPlayTimeout();
         callback.onError(ResUtil.getString(R.string.error_play_timeout));
         stop();
+    }
+
+    private void logPlayTimeout() {
+        if (!LogSession.get().isRunning()) return;
+        Player current = player;
+        Log.i("TV-Playback", "player=" + Integer.toHexString(System.identityHashCode(current)) + " event=playTimeout state=" + (current == null ? -1 : current.getPlaybackState()) + " bufferedMs=" + (current == null ? 0 : current.getTotalBufferedDuration()) + " times=" + timeoutExtensions);
+    }
+
+    /**
+     * 洛视频：HLS 源到 READY 要依次拉 主列表 → 分片子列表(可达 200KB+) → 首个分片(可达 600KB+)，
+     * 浏览器拿到首片首帧就能出画，ExoPlayer 必须等整段落地，慢源上 15s 常常不够，表现为「浏览器能播、App 连接超时」。
+     * 只要播放器仍在缓冲、没有报错、且缓冲时长确实在增长，就续期而不是判死；
+     * 首个窗口无法区分「慢 HLS 还没下到首片」和「真死」（两者 buffered 都是 0），为不误杀慢源允许一次盲续期；
+     * 此后续期必须有缓冲进展，完全零进展的死源最迟约 30s 报错（而非无限等）。
+     */
+    private boolean extendPlayTimeout() {
+        if (timeoutExtensions >= MAX_TIMEOUT_EXTENSIONS) return false;
+        if (player == null || player.getPlayerError() != null) return false;
+        if (player.getPlaybackState() != Player.STATE_BUFFERING) return false;
+        long buffered = Math.max(0, player.getTotalBufferedDuration());
+        boolean first = timeoutExtensions == 0;
+        if (!first && buffered <= timeoutBufferedMs) return false;
+        timeoutBufferedMs = buffered;
+        timeoutExtensions++;
+        if (LogSession.get().isRunning()) Log.i("TV-Playback", "player=" + Integer.toHexString(System.identityHashCode(player)) + " event=playTimeoutExtend bufferedMs=" + buffered + " times=" + timeoutExtensions);
+        App.post(runnable, Constant.TIMEOUT_PLAY);
+        return true;
     }
 
     private void ensureEngine(PlaySpec spec) {

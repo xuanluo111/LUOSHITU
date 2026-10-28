@@ -53,9 +53,10 @@ public abstract class MpvPlayer extends DiscMenuController implements Player {
     public void setAudioFilterListener(AudioFilterListener listener) { }
     public void setVerboseLoggingEnabled(boolean enabled) { }
     public int getAudioChannelCount() { return 0; }
-    public SubtitleSelectionState getSubtitleSelectionState() { return null; }
-    public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride selection) { return null; }
-    public SubtitleOffsets getSubtitleOffsets() { return null; }
+    // 洛视频：调用方（TrackDialog / SubtitleSettingPanel / SubtitleOffsetPanel）拿到返回值后不判空直接解引用，必须给默认值。
+    public SubtitleSelectionState getSubtitleSelectionState() { return SubtitleSelectionState.EMPTY; }
+    public SubtitleContent getSubtitleContentForSelection(TrackSelectionOverride selection) { return SubtitleContent.UNSUPPORTED; }
+    public SubtitleOffsets getSubtitleOffsets() { return SubtitleOffsets.ZERO; }
     public void setSubtitleOffsets(SubtitleOffsets offsets) { }
     public void setSubtitleContentEnabled(boolean enabled) { }
     public boolean canRetrySubtitleContent(Format format) { return false; }

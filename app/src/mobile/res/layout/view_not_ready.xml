@@ -26,10 +26,18 @@
         android:textSize="20sp" />
 
     <Button
-        android:id="@+id/goLive"
+        android:id="@+id/retry"
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_marginTop="40dp"
+        android:text="重新加载"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/goLive"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginTop="16dp"
         android:text="先看电视吧"
         android:textSize="24sp" />
 </LinearLayout>

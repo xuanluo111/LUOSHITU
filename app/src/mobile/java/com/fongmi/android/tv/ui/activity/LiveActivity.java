@@ -205,7 +205,9 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
         mBinding.control.action.across.setOnClickListener(view -> onAcross());
         mBinding.control.action.change.setOnClickListener(view -> onChange());
         mBinding.control.action.player.setOnClickListener(view -> onPlayer());
-        mBinding.control.action.decoder.setOnClickListener(view -> onDecoder());
+        // 洛视频：解码面板依赖上游私有 DecoderManager，本仓库已降级为不注入（见 ExoUtil），
+        // 切换实际不生效且永远回显「自动」，直接隐藏入口。
+        mBinding.control.action.decoder.setVisibility(View.GONE);
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.action.getRoot().setOnTouchListener(this::onActionTouch);
         mBinding.video.setOnTouchListener((view, event) -> mInput.onTouchEvent(event));
@@ -1017,7 +1019,7 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
     @Override
     protected void onWebPlaybackChanged(boolean active) {
-        PlaybackAction.setWebPlaybackMode(active, mBinding.control.action.player, mBinding.control.action.decoder, mBinding.control.action.speed, mBinding.control.action.scale, mBinding.control.action.text, mBinding.control.action.audio, mBinding.control.action.video);
+        PlaybackAction.setWebPlaybackMode(active, mBinding.control.action.player, mBinding.control.action.speed, mBinding.control.action.scale, mBinding.control.action.text, mBinding.control.action.audio, mBinding.control.action.video);
         if (!active) {
             setPlaybackMode();
             setTrackVisible();

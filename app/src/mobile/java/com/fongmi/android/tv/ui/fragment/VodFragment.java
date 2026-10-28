@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewpager.widget.ViewPager;
 
+import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Class;
@@ -57,10 +58,23 @@ import java.util.Optional;
 
 public class VodFragment extends BaseFragment implements ConfigListener, SiteListener, FilterListener, TypeAdapter.OnClickListener {
 
+    /** 洛视频：首页超过这个时间还没拿到结果就结束转圈，给老人一个真实出口 */
+    private static final long TIMEOUT_HOME = 25_000;
+
     private FragmentVodBinding mBinding;
     private SiteViewModel mViewModel;
     private TypeAdapter mAdapter;
     private Result mResult;
+
+    private final Runnable mHomeTimeout = () -> {
+        if (mBinding == null) return;
+        if (mBinding.progress.getRoot().getVisibility() != View.VISIBLE) return;
+        // 洛视频：以内容可见性为准，而不是 adapter 数量——切换配置失败时旧 adapter 仍有数据，
+        // 但内容区已被 hideContent 隐藏，按数量判断会让兜底失效，转圈永远收不掉。
+        if (mBinding.pager.getVisibility() == View.VISIBLE) return;
+        hideProgress();
+        showNotReady();
+    };
 
     public static VodFragment newInstance() {
         return new VodFragment();
@@ -136,7 +150,14 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
         mBinding.pager.getAdapter().notifyDataSetChanged();
         setFabVisible(0);
         hideProgress();
-        showContent();
+        // 洛视频：拉回来是空结果时不要用空白页盖掉出口
+        if (mAdapter.getItemCount() == 0) {
+            hideContent();
+            showNotReady();
+        } else {
+            hideNotReady();
+            showContent();
+        }
     }
 
     private void setFabVisible(int position) {
@@ -194,10 +215,12 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
 
     private void showProgress() {
         mBinding.progress.getRoot().setVisibility(View.VISIBLE);
+        App.post(mHomeTimeout, TIMEOUT_HOME);
     }
 
     private void hideProgress() {
         mBinding.progress.getRoot().setVisibility(View.GONE);
+        App.removeCallbacks(mHomeTimeout);
     }
 
     private void hideContent() {
@@ -269,10 +292,28 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
     private void showNotReady() {
         mBinding.notReady.getRoot().setVisibility(View.VISIBLE);
         mBinding.notReady.goLive.setOnClickListener(v -> ((HomeActivity) requireActivity()).change(1));
+        mBinding.notReady.retry.setOnClickListener(v -> retryHome());
     }
 
     private void hideNotReady() {
         mBinding.notReady.getRoot().setVisibility(View.GONE);
+    }
+
+    /** 洛视频：配置或首页内容拉取失败/超时后允许手动重试，不用杀进程重进 */
+    private void retryHome() {
+        hideNotReady();
+        showProgress();
+        setTitle();
+        setLogo();
+        VodConfig.get().init().load(new Callback() {
+            @Override
+            public void error(String msg) {
+                Notify.show(msg);
+                // 失败必须当场收转圈；mHomeTimeout 会因旧 adapter 仍有数据而拒绝接管
+                hideProgress();
+                showNotReady();
+            }
+        });
     }
 
     @Override
@@ -289,6 +330,8 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
             @Override
             public void error(String msg) {
                 Notify.dismiss();
+                // 失败必须当场收转圈；start() 只 hideContent 不清 adapter，mHomeTimeout 拒绝接管
+                hideProgress();
                 showNotReady();
             }
         });

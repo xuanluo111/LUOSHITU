@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
@@ -147,6 +148,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     private Runnable mR3;
     private Runnable mR4;
     private History mHistory;
+    private int mControlTopHeight;
+    private int mStatusBarTop;
     private boolean fullscreen;
     private boolean webFullscreen;
     private boolean externalPlaybackCompleted;
@@ -352,12 +355,14 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.info.setOnClickListener(view -> onInfo());
         mBinding.control.keep.setOnClickListener(view -> onKeep());
         mBinding.control.play.setOnClickListener(view -> checkPlay());
-        mBinding.control.next.setOnClickListener(view -> checkNext());
-        mBinding.control.prev.setOnClickListener(view -> checkPrev());
-        // 洛视频 F4：快进退 15 秒大按钮（老人不依赖手势）
-        mBinding.control.rewind15.setOnClickListener(view -> seekTo(-15000));
-        mBinding.control.forward15.setOnClickListener(view -> seekTo(15000));
+        mBinding.control.action.next.setOnClickListener(view -> checkNext());
+        mBinding.control.action.prev.setOnClickListener(view -> checkPrev());
         mBinding.control.setting.setOnClickListener(view -> onSetting());
+        // 洛视频：非全屏时一键进全屏，进入后先亮一下控制条，由自动隐藏接管（否则点完没反馈）。
+        mBinding.control.fullscreen.setOnClickListener(view -> {
+            enterFullscreen();
+            showControl();
+        });
         mBinding.control.heading.setOnLongClickListener(view -> onChange());
         mBinding.control.right.lock.setOnClickListener(view -> onLock());
         mBinding.control.right.rotate.setOnClickListener(view -> onRotate());
@@ -371,7 +376,11 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.action.replay.setOnClickListener(view -> onReplay());
         mBinding.control.action.parse.setOnClickListener(view -> onParse());
         mBinding.control.action.player.setOnClickListener(view -> onPlayer());
-        mBinding.control.action.decoder.setOnClickListener(view -> onDecoder());
+        // 洛视频：解码模式面板依赖上游私有 DecoderManager。本仓库移植时已把它降级为「不注入」
+        // （见 ExoUtil 中 ExoRenderersFactory 的注释：decoderManager 收到即丢弃），
+        // 结果是点任何一档都不会真的换解码器、重开面板还显示「自动」，纯粹误导用户。
+        // 在恢复真实解码切换能力之前，先把入口藏起来，避免老人反复点却看不到任何变化。
+        mBinding.control.action.decoder.setVisibility(View.GONE);
         mBinding.control.action.ending.setOnClickListener(view -> onEnding());
         mBinding.control.action.repeat.setOnClickListener(view -> onRepeat());
         mBinding.control.action.opening.setOnClickListener(view -> onOpening());
@@ -384,6 +393,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.action.ending.setOnLongClickListener(view -> onEndingReset());
         mBinding.control.action.opening.setOnLongClickListener(view -> onOpeningReset());
+        mBinding.widget.error.setOnClickListener(view -> onRetryPlayback());
         mBinding.video.setOnTouchListener((view, event) -> dispatchDiscMenuTouch(event) || mInput.onTouchEvent(event));
         mBinding.control.action.getRoot().setOnTouchListener(this::onActionTouch);
         mBinding.swipeLayout.setOnRefreshListener(this::onSwipeRefresh);
@@ -391,10 +401,31 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
 
     private WindowInsetsCompat setStatusBar(WindowInsetsCompat insets) {
         int top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+        mStatusBarTop = top;
         ViewGroup.LayoutParams lp = mBinding.statusBar.getLayoutParams();
         lp.height = top;
         mBinding.statusBar.setLayoutParams(lp);
+        // 洛视频：补偿只服务全屏态（video 铺满窗口顶进状态栏区域）。非全屏时 video 区
+        // 已在 statusBar 占位之下，再叠加 inset 会双重补偿，顶栏整体下移一个状态栏高度。
+        applyControlTopInset(fullscreen ? top : 0);
         return insets;
+    }
+
+    /**
+     * 洛视频：竖屏全屏时 video 会铺满整个窗口（含状态栏区域），而系统状态栏仍然显示，
+     * 顶部的返回键与标题会被状态栏压住。这里按状态栏高度给控制条顶栏让出空间。
+     * 横屏沉浸态的 top 为 0，不会产生任何位置变化，不影响主使用路径。
+     */
+    private void applyControlTopInset(int top) {
+        View bar = mBinding.control.top;
+        if (mControlTopHeight <= 0) mControlTopHeight = bar.getLayoutParams().height;
+        if (mControlTopHeight <= 0) return;
+        ViewGroup.LayoutParams lp = bar.getLayoutParams();
+        int height = mControlTopHeight + top;
+        if (lp.height == height) return;
+        lp.height = height;
+        bar.setLayoutParams(lp);
+        bar.setPadding(bar.getPaddingLeft(), top, bar.getPaddingRight(), bar.getPaddingBottom());
     }
 
     private void setRecyclerView() {
@@ -593,7 +624,18 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     public void resetPlaybackForError(String msg) {
         mBinding.swipeLayout.setEnabled(true);
         PlaybackReset.afterError(player(), () -> mClock.setCallback(null));
-        showError(msg);
+        // 洛视频：把「怎么办」直接写进提示里。老人不会想到下拉刷新，必须给一个看得见、点得到的入口。
+        showError(msg + "，点这里重试");
+    }
+
+    /**
+     * 洛视频：点错误提示重试，等价于下拉刷新。
+     * 断网恢复后播放器不会自己续播（实测 state 一直停在 ERROR），必须用户手动重来，
+     * 而这个入口以前只存在于一个下滑手势里，适老化场景基本等于没有。
+     */
+    private void onRetryPlayback() {
+        hideError();
+        mVod.refresh();
     }
 
     @Override
@@ -899,8 +941,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
 
     private void setEpisodeAdapter(List<Episode> items) {
         mBinding.control.action.episodes.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
-        mBinding.control.next.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
-        mBinding.control.prev.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
+        mBinding.control.action.next.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
+        mBinding.control.action.prev.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
         mBinding.reverse.setVisibility(items.size() < 2 ? View.GONE : View.VISIBLE);
         mBinding.episode.setVisibility(items.isEmpty() ? View.GONE : View.VISIBLE);
         mBinding.more.setVisibility(items.size() < 10 ? View.GONE : View.VISIBLE);
@@ -1173,20 +1215,39 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
 
     private void enterFullscreen() {
         if (isFullscreen()) return;
+        if (service() == null) return;
         setFullscreen(true);
+        applyControlTopInset(mStatusBarTop);
         if (isLand() && !player().isPortrait()) setTransition();
         mBinding.video.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
         setRequestedOrientation(PlaybackOrientation.getEnterFullscreenOrientation(player().isPortrait()));
         mBinding.control.heading.setVisibility(View.VISIBLE);
         setRotate(player().isPortrait());
         mInput.resetScale();
+        refreshSurface();
         App.post(mR3, 2000);
         hideControl();
+    }
+
+    /**
+     * 洛视频：暂停或播完时解码器不再送新帧，SurfaceView 只改布局参数不会重绘，
+     * 全屏切换后画面会停在旧的窗口尺寸（停在左上角小窗）。这里让 surface 跟随新布局重建一次。
+     */
+    private void refreshSurface() {
+        mBinding.player.post(() -> {
+            if (service() == null || player().isPlaying()) return;
+            View surface = mBinding.player.getVideoSurfaceView();
+            if (surface == null) return;
+            if (surface instanceof SurfaceView view) view.getHolder().setSizeFromLayout();
+            surface.requestLayout();
+            surface.invalidate();
+        });
     }
 
     private void exitFullscreen() {
         if (!isFullscreen()) return;
         setFullscreen(false);
+        applyControlTopInset(0);
         mInput.cancelSeekTaps();
         mSeekFeedback.clear();
         if (isLand() && !player().isPortrait()) setTransition();
@@ -1195,6 +1256,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.heading.setVisibility(View.INVISIBLE);
         mBinding.video.setLayoutParams(mFrameParams);
         mInput.resetScale();
+        refreshSurface();
         App.post(mR3, 2000);
         setRotate(false);
         hideControl();
@@ -1251,6 +1313,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.setting.setVisibility(mHistory == null || isFullscreen() ? View.GONE : View.VISIBLE);
         mBinding.control.right.rotate.setVisibility(isFullscreen() && !isLock() ? View.VISIBLE : View.GONE);
         mBinding.control.keep.setVisibility(mHistory == null || isFullscreen() ? View.GONE : View.VISIBLE);
+        mBinding.control.fullscreen.setVisibility(isFullscreen() || isLock() ? View.GONE : View.VISIBLE);
         mBinding.control.action.getRoot().setVisibility(isFullscreen() ? View.VISIBLE : View.GONE);
         mBinding.control.right.lock.setVisibility(isFullscreen() ? View.VISIBLE : View.GONE);
         mBinding.control.action.parse.setVisibility(isUseParse() ? View.VISIBLE : View.GONE);
@@ -1635,7 +1698,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
 
     @Override
     protected void onWebPlaybackChanged(boolean active) {
-        PlaybackAction.setWebPlaybackMode(active, mBinding.control.action.player, mBinding.control.action.decoder, mBinding.control.action.reset, mBinding.control.action.replay, mBinding.control.action.repeat, mBinding.control.action.speed, mBinding.control.action.scale, mBinding.control.action.text, mBinding.control.action.audio, mBinding.control.action.video, mBinding.control.action.danmaku, mBinding.control.action.edition, mBinding.control.action.chapter, mBinding.control.action.opening, mBinding.control.action.ending);
+        // 洛视频：解码按钮不参与显隐（详见 initControl 中的说明，入口已隐藏）
+        PlaybackAction.setWebPlaybackMode(active, mBinding.control.action.player, mBinding.control.action.reset, mBinding.control.action.replay, mBinding.control.action.repeat, mBinding.control.action.speed, mBinding.control.action.scale, mBinding.control.action.text, mBinding.control.action.audio, mBinding.control.action.video, mBinding.control.action.danmaku, mBinding.control.action.edition, mBinding.control.action.chapter, mBinding.control.action.opening, mBinding.control.action.ending);
         if (!active) {
             setPlaybackMode();
             setTrackVisible();

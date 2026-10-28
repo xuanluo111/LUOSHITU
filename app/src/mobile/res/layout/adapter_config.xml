@@ -19,7 +19,7 @@
         android:textSize="14sp"
         app:backgroundTint="@color/selector_button"
         app:strokeColor="@color/selector_stroke"
-        tools:text="https://fongmi.github.io/cat.json" />
+        tools:text="https://example.com/cat.json" />
 
     <com.fongmi.android.tv.ui.custom.DialogActionView
         android:id="@+id/delete"

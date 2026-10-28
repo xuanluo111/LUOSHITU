@@ -34,6 +34,16 @@
         <item name="titleTextColor">@color/white</item>
     </style>
 
+    <!-- 洛视频：底部导航文字。Material 默认 12sp 对老人偏小，这里统一放大到 16sp。 -->
+    <style name="NavLabel" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="NavLabelActive" parent="NavLabel">
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="MpvScriptItem">
         <item name="android:background">@drawable/shape_accent</item>
     </style>

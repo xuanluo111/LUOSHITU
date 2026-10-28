@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 洛视频：底部导航的图标与文字统一配色。
+     导航栏是白底，必须用深色：选中用主色（10.9:1），未选中用次要文字色（10.4:1），
+     两者都远超 WCAG AAA 7:1，保证老人在任何机型的浅色壁纸下都读得清。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/elder_primary" android:state_checked="true" />
+    <item android:color="@color/elder_text_secondary" android:state_checked="false" />
+</selector>

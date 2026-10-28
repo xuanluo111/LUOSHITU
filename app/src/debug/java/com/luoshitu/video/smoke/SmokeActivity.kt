@@ -56,14 +56,16 @@ class SmokeActivity : Activity() {
                 val report = JarSmokeProbe.run(jar, key, api)
                 Log.i(TAG, "SMOKE_RESULT ok=${report.ok} siteKey=${report.siteKey} elapsedMs=${report.elapsedMs} detail=${report.detail}")
                 runOnUiThread {
+                    // 冒烟下载可达数分钟，期间 Activity 可能已销毁，脱离的窗口不再更新
+                    if (isDestroyed || isFinishing) return@runOnUiThread
                     button.isEnabled = true
-                    output.text = listOf(
+                    output.text = listOfNotNull(
                         "结果: ${if (report.ok) "通过 ✓" else "失败 ✗"}",
                         "siteKey: ${report.siteKey}",
                         "耗时: ${report.elapsedMs} ms",
                         "说明: ${report.detail}",
                         report.homeJsonPreview?.let { "返回预览: $it" },
-                    ).filterNotNull().joinToString("\n")
+                    ).joinToString("\n")
                 }
             }.start()
         }

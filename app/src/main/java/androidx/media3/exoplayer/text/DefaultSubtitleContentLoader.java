@@ -9,5 +9,6 @@ public class DefaultSubtitleContentLoader {
 
     public DefaultSubtitleContentLoader(androidx.media3.datasource.DataSource.Factory factory) { }
 
-    public SubtitleContent load(MediaItem item, android.net.Uri uri, Format format) { return null; }
+    // 洛视频：返回结果会被直接读状态字段，null 会 NPE；此处统一上报“不支持”。
+    public SubtitleContent load(MediaItem item, android.net.Uri uri, Format format) { return SubtitleContent.UNSUPPORTED; }
 }
