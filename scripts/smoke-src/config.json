@@ -1,0 +1,15 @@
+{
+  "sites": [
+    {
+      "key": "smoke",
+      "name": "冒烟测试站",
+      "type": 3,
+      "api": "./demo.js",
+      "searchable": 1,
+      "changeable": 1
+    }
+  ],
+  "parses": [],
+  "flags": [],
+  "lives": []
+}
