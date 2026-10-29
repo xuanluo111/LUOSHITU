@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,7 +101,16 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
     private Runnable mR1;
     private Runnable mR2;
     private Runnable mR3;
+    // 洛视频：加载看门狗。断网时拉流请求会一直挂着，既没有超时回调也没有错误回调，
+    // 转圈会永远转下去，老人只能退出重进。超过这个时间还没起播就当作失败。
+    private final Runnable mR5 = this::onLoadTimeout;
     private List<Group> mHides;
+    // 洛视频：本频道是否已经出过画，出过就不再显示加载层（直播流会长期停在 BUFFERING）。
+    private boolean started;
+    // 洛视频：看门狗判定加载失败后置位，防止后续 BUFFERING 回调又把加载层盖回来。
+    private boolean loadFailed;
+    // 看门狗已挂牌标记：BUFFERING 会反复回调，每回调一次就重排一次的话 20 秒永远不会到。
+    private boolean loading;
     private Group mGroup;
     private Channel mChannel;
     private String mPlaybackKey;
@@ -211,6 +221,8 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.action.getRoot().setOnTouchListener(this::onActionTouch);
         mBinding.video.setOnTouchListener((view, event) -> mInput.onTouchEvent(event));
+        // 洛视频：错误提示本身就是重试按钮，断网后老人不用退出去重进。
+        mBinding.widget.error.setOnClickListener(view -> retryLoad());
     }
 
     private void setRecyclerView() {
@@ -268,6 +280,10 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
     }
 
     private void checkLive() {
+        // 洛视频：直播配置为空时要先把网拉一次才能拿到频道。这一步以前既不挂加载层也不挂看门狗，
+        // 断网时就变成永远转圈（加载层是布局默认可见的），老人只能退出重进。
+        // 现在统一先挂牌，配置回来看 getLive() 接管，拉不回来由 error 回调收口。
+        showProgress();
         if (isEmpty()) LiveConfig.get().init().load(getCallback());
         else getLive();
     }
@@ -281,7 +297,13 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
             @Override
             public void error(String msg) {
-                Notify.show(msg);
+                // 洛视频：以前只弹一个几秒就消失的 toast，加载层继续转，看着像还在加载。
+                // 改成在页面上留一条可点击重试的大字提示。
+                // 注意不要把 msg 直接贴给用户：断网时它是 "Unable to resolve host \"live.hacks.tools\"…"
+                // 这类技术异常，老人看不懂；详细原因只留在日志里排查。
+                Log.i("LiveActivity", "config load error " + msg);
+                loadFailed = true;
+                showError(getString(R.string.error_live_config));
             }
         };
     }
@@ -491,9 +513,39 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
     @Override
     public void showProgress() {
+        // 洛视频：IPTV 直播流没有固定时长，ExoPlayer 常常长期停在 STATE_BUFFERING，画面却在正常推进，
+        // 状态回调会反复把加载层盖回去，转圈和网速字样永久挡在画面中央。
+        // 这里记录本频道是否已经出过画，出过就不再把加载层盖回去，直到换台才重置。
+        if (started || loadFailed) return;
         mBinding.progress.getRoot().setVisibility(View.VISIBLE);
         App.post(mR2, 0);
+        if (!loading) {
+            loading = true;
+            App.post(mR5, 20000);
+        }
         hideError();
+    }
+
+    private void onLoadTimeout() {
+        loading = false;
+        if (started || loadFailed || isFinishing()) return;
+        // 看门狗不跟着加载层一起取消：断网时 BUFFERING/READY 会来回跳，取消后永远等不到超时。
+        // 改为触发时看加载层是否还盖着，已经出画的不处理。
+        if (mBinding.progress.getRoot().getVisibility() != View.VISIBLE) return;
+        loadFailed = true;
+        showError(getString(R.string.error_network_poor));
+    }
+
+    private void retryLoad() {
+        loadFailed = false;
+        loading = false;
+        hideError();
+        // 重试时手动把加载层和看门狗挂上，不指望播放器一定会回一次 BUFFERING。
+        showProgress();
+        // 洛视频：如果频道还没拉下来（断网时配置加载失败就是这种），重试要重新拉配置，
+        // 而不是刷新一个根本不存在的频道。
+        if (getHome().isEmpty() || mChannel == null) checkLive();
+        else mLive.refresh();
     }
 
     private void hideProgress() {
@@ -505,7 +557,8 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
     private void showError(String text) {
         PlaybackAction.hideSpeedHint(mBinding.widget.message);
         mBinding.widget.error.setVisibility(View.VISIBLE);
-        mBinding.widget.error.setText(text);
+        // 洛视频：断网时直播页只剩一行错误字，没告诉老人下一步该做什么，这里带上重试指引。
+        mBinding.widget.error.setText(getString(R.string.error_retry_message, text));
         hideProgress();
     }
 
@@ -516,7 +569,9 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
     private void showControl() {
         if (service() == null || isInPictureInPictureMode()) return;
-        mBinding.control.info.setVisibility(player().isEmpty() ? View.GONE : View.VISIBLE);
+        // 洛视频：这个按钮弹出来的是 User-Agent、127.0.0.1 代理地址这类调试信息（实测误触后满屏乱码），
+        // 对看片没有任何帮助，移动端直接收起，别把技术细节甩到老人脸上。
+        mBinding.control.info.setVisibility(View.GONE);
         mBinding.control.cast.setVisibility(player().isEmpty() ? View.GONE : View.VISIBLE);
         mBinding.control.right.rotate.setVisibility(isLock() ? View.GONE : View.VISIBLE);
         mBinding.control.center.setVisibility(isLock() ? View.GONE : View.VISIBLE);
@@ -922,6 +977,11 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
     @Override
     protected void onPlayingChanged(boolean isPlaying) {
+        // 真正出画后收起加载层，并把本频道标记为已起播。
+        if (isPlaying) {
+            started = true;
+            hideProgress();
+        }
         if (isPlaying || isPaused() || isWebPlaybackActive()) updatePlayControl(isPlaying);
     }
 
@@ -959,6 +1019,9 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
 
     @Override
     public void setLive(Live item) {
+        started = false;
+        loadFailed = false;
+        loading = false;
         if (item.isSelected()) item.getGroups().clear();
         LiveConfig.get().setHome(item);
         player().reset();
@@ -1237,7 +1300,7 @@ public class LiveActivity extends PlaybackActivity implements TouchInput.Listene
     @Override
     protected void onDestroy() {
         if (isBindingOwner() && isOwner()) Source.get().exit();
-        App.removeCallbacks(mR1, mR2, mR3);
+        App.removeCallbacks(mR1, mR2, mR3, mR5);
         super.onDestroy();
     }
 }

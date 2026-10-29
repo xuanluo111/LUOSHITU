@@ -12,16 +12,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="节目单还没准备好，家人正在处理"
+        android:text="电视暂时打不开"
         android:textColor="#111111"
         android:textSize="26sp" />
 
     <TextView
+        android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="可以先看电视，或等一会儿再打开"
+        android:text="先看看家里的 WiFi 或网线，再点下面的重新加载"
         android:textColor="#3C3C3C"
         android:textSize="20sp" />
 

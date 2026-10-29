@@ -19,6 +19,12 @@
     <color name="elder_divider">#D9D9D9</color>
     <color name="elder_scrim">#33000000</color>
 
+    <!-- 深色页面（如求助页）专用：页面底色钉死为 #424242，与设置/点播等页一致，
+         文字按该底色测算，避免跟随系统主题变浅后深色字落在深底上。 -->
+    <color name="elder_page_dark">#424242</color>
+    <color name="elder_text_on_dark">#FFFFFF</color>            <!-- 10.0:1 -->
+    <color name="elder_text_on_dark_secondary">#E0E0E0</color>  <!-- 7.6:1 -->
+
     <!-- 字号下限：正文 20 / 列表主标题 22 / 页面主标题 24 / 频道名·求助·继续看片名 28 -->
     <dimen name="elder_font_body">20sp</dimen>
     <dimen name="elder_font_list_title">22sp</dimen>

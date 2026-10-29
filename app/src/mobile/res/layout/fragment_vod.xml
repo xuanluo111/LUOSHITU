@@ -34,6 +34,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:singleLine="true"
                 android:text="@string/app_name"
                 android:textAppearance="@style/ToolbarTextAppearance" />

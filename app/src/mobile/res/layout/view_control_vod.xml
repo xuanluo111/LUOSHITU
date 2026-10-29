@@ -10,6 +10,7 @@
         android:id="@+id/top"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/shape_control_scrim_top"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="4dp"
@@ -167,7 +168,10 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp" />
+            android:paddingEnd="16dp"
+            app:bar_height="8dp"
+            app:scrubber_dragged_size="26dp"
+            app:scrubber_enabled_size="22dp" />
 
         <include
             android:id="@+id/action"

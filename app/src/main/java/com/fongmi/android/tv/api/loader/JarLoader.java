@@ -38,7 +38,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
@@ -51,6 +53,13 @@ public class JarLoader {
      * 而首页是同步等 parseJar 结果的。没有总时长预算，就等于首页永久空转且不报任何错。
      */
     private static final long JAR_DOWNLOAD_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(45);
+    /**
+     * 洛视频：这个源不支持 Range，每次重试都得从 0 开始，而它又常在快下完时卡住
+     * （实测 1,081,344 / 1,113,561 就停在 97%，再等 120s 读超时全部作废）。
+     * 好在快的时候 90 秒能下到 93%，重试几次就能赶上。
+     */
+    private static final int JAR_DOWNLOAD_ATTEMPTS = 3;
+    private static final long JAR_RETRY_DELAY_MS = TimeUnit.SECONDS.toMillis(5);
     /** 下载失败后的一段时间内不再重试，否则每次进首页都要再干等一轮。 */
     private static final long JAR_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10);
 
@@ -61,6 +70,8 @@ public class JarLoader {
     private final ConcurrentHashMap<String, Long> failures;
     /** 同一 key 同一时间只跑一个后台刷新。 */
     private final Set<String> refreshing;
+    /** 同一 key 同一时间只跑一个 jar 下载；本次没等到不代表已经停了，见 download()。 */
+    private final ConcurrentHashMap<String, Future<File>> downloads;
     private volatile String recent;
 
     public JarLoader() {
@@ -70,6 +81,7 @@ public class JarLoader {
         locks = new ConcurrentHashMap<>();
         failures = new ConcurrentHashMap<>();
         refreshing = ConcurrentHashMap.newKeySet();
+        downloads = new ConcurrentHashMap<>();
     }
 
     public void clear() {
@@ -80,6 +92,8 @@ public class JarLoader {
         locks.clear();
         failures.clear();
         refreshing.clear();
+        // downloads 不能跟着 clear：里面是“此刻真的还在跑”的下载，清掉会让下次调用重复提交，
+        // 撞上 Download 自己的 ACTIVE 保护并被误记成失败。它由任务的 finally 自己回收。
         recent = null;
         if (failure instanceof RuntimeException error) throw error;
         if (failure instanceof Error error) throw error;
@@ -258,24 +272,80 @@ public class JarLoader {
     }
 
     /**
-     * 洛视频：jar 下载必须有终点。基座 Download 的 120s 只作用于“单次 socket 读”，
+     * 洛视频：jar 下载必须有终点。基座 Download 的 120s 只作用于「单次 socket 读」，
      * 服务器持续缓慢吐字节时永远触发不到；而 initSite() 是同步等这里的，
      * 一等不到整个首页就永久空转。这里再加一层总时长预算，超时返回 null 由 load() 跳过。
      */
     private File download(String key, String jar) {
+        Future<File> future = futureFor(key, jar);
         try {
-            File file = Task.submitLarge(() -> Download.create(jar, Path.jar(jar)).get(), JAR_DOWNLOAD_TIMEOUT_MS).get();
-            failures.remove(key);
+            File file = future.get(JAR_DOWNLOAD_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            if (file != null) failures.remove(key);
             return file;
-        } catch (InterruptedException | CancellationException e) {
+        } catch (TimeoutException e) {
+            // 洛视频：注意这里不 cancel。让下载线程自己把剩下的字节收完。
+            Log.i(TAG, "jar download over budget, continues in background: " + jar);
+            return null;
+        } catch (InterruptedException e) {
             // 洛视频：用户切配置触发的取消不是下载失败，不能计入退避，否则 10 分钟内切回该配置站点全空且无提示。
-            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
+            Log.i(TAG, "jar download cancelled: " + jar);
+            return null;
+        } catch (CancellationException e) {
             Log.i(TAG, "jar download cancelled: " + jar);
             return null;
         } catch (Throwable e) {
             failures.put(key, System.currentTimeMillis());
             Log.e(TAG, "jar download give up: " + jar, e);
             return null;
+        }
+    }
+
+    /**
+     * 洛视频：同一个 jar 只应有一个下载在跑。已在跑就复用它的 future——
+     * 这样老人再点一次「重新加载」时是「接着等」，而不是立刻又被告知失败。
+     * download() 调用频率很低（一次配置加载一次），直接加锁最省心。
+     */
+    private synchronized Future<File> futureFor(String key, String jar) {
+        Future<File> future = downloads.get(key);
+        if (future == null) {
+            future = Task.submitDetached(() -> doDownload(key, jar));
+            downloads.put(key, future);
+        }
+        return future;
+    }
+
+    /**
+     * 洛视频：后台真正干活的部分，不设总时长上限。
+     * 这里原来是 Task.submitLarge(…, 45s)，而那个 timeout 的语义是到点就 cancel(true)：
+     * 该源只给弱 ETag（W/"…"），Download.validator() 认强 ETag、弱的一律返回空串，
+     * 于是 close() 里 `validator.isEmpty()` 成立，被打断时把已经下到盘上的分片整段删掉。
+     * 实测 4.1KB/s 时 45s 只能下 190KB / 1113KB，每轮全丢、下次冷启动又从 0 开始，弱网下永远下不完。
+     * 现在改成「任务不设超时，只限制本次愿意等多久」：等不到就让首页先转着提示，
+     * 下载在后台接着跑，下完 publish，下次直接命中缓存。
+     */
+    private File doDownload(String key, String jar) {
+        try {
+            for (int attempt = 1; attempt <= JAR_DOWNLOAD_ATTEMPTS; attempt++) {
+                try {
+                    File file = Download.create(jar, Path.jar(jar)).get();
+                    if (file != null && file.length() > 0) return file;
+                    Log.w(TAG, "jar download attempt " + attempt + " produced nothing: " + jar);
+                } catch (Throwable e) {
+                    Log.w(TAG, "jar download attempt " + attempt + "/" + JAR_DOWNLOAD_ATTEMPTS + " failed: " + jar, e);
+                }
+                if (attempt < JAR_DOWNLOAD_ATTEMPTS) Thread.sleep(JAR_RETRY_DELAY_MS);
+            }
+            // 后台重试也全失败了才退避，否则 load() 会每隔一次就重新提交一轮必败的下载。
+            failures.put(key, System.currentTimeMillis());
+            Log.w(TAG, "jar download gave up after " + JAR_DOWNLOAD_ATTEMPTS + " attempts: " + jar);
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.i(TAG, "jar background download interrupted: " + jar);
+            return null;
+        } finally {
+            downloads.remove(key);
         }
     }
 

@@ -41,11 +41,26 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
+        <!-- 洛视频：默认必须是 gone，加载层一律由代码控制显隐，避免漏掉收起留下永久转圈。 -->
         <include
             android:id="@+id/progress"
             layout="@layout/view_progress"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- 洛视频：详情页原本没有任何返回入口，只能靠系统手势/返回键，老人常常卡在详情页回不去。
+             这里给一个 64dp 的大按钮；起播后由代码隐藏，不与播放控制条撑位置。 -->
+        <ImageView
+            android:id="@+id/detailBack"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="12dp"
+            android:background="@drawable/shape_detail_back"
+            android:contentDescription="@string/detail_back"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_control_back" />
 
     </FrameLayout>
 
@@ -220,10 +235,11 @@
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/reverse"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="4dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="12dp"
                             android:src="@drawable/ic_action_reverse"
                             android:visibility="gone"
                             tools:visibility="visible" />
@@ -235,9 +251,10 @@
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/more"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="12dp"
                             android:src="@drawable/ic_action_more"
                             android:visibility="gone"
                             tools:visibility="visible" />

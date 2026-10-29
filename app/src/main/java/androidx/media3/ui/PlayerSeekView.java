@@ -3,6 +3,7 @@
 package androidx.media3.ui;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -24,7 +25,7 @@ import java.util.Locale;
 
 public class PlayerSeekView extends FrameLayout {
 
-    private final TimeBar timeBar;
+    private final DefaultTimeBar timeBar;
     private final TextView positionView;
     private final TextView durationView;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -78,6 +79,11 @@ public class PlayerSeekView extends FrameLayout {
         positionView.setId(androidx.media3.ui.R.id.exo_position);
         durationView.setId(androidx.media3.ui.R.id.exo_duration);
         timeBar = new DefaultTimeBar(context, attrs);
+        // 洛视频：默认轨道约 3dp、滑块约 12dp，老人看不清也抓不住。
+        // 轨道粗细/滑块尺寸走布局里的 app:bar_height / app:scrubber_* 属性，这里只提高对比度。
+        timeBar.setPlayedColor(0xFFFFC107);
+        timeBar.setUnplayedColor(0x66FFFFFF);
+        timeBar.setBufferedColor(0x38FFFFFF);
         timeBar.addListener(new TimeBar.OnScrubListener() {
 
             @Override
@@ -110,7 +116,7 @@ public class PlayerSeekView extends FrameLayout {
     private View createContent(Context context) {
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.addView((View) timeBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(context, 18)));
+        root.addView((View) timeBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(context, 30)));
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.addView(positionView, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -122,7 +128,11 @@ public class PlayerSeekView extends FrameLayout {
     private TextView createText(Context context, String text) {
         TextView view = new TextView(context);
         view.setTextColor(0xFFFFFFFF);
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        // 洛视频：12sp 的纯白时间文字直接压在亮画面上几乎看不清（实测雪山画面里完全糊成一片），
+        // 适老化场景必须保住可读性：字号抬高一级 + 加粗 + 黑色投影当底衬。
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        view.setTypeface(Typeface.DEFAULT_BOLD);
+        view.setShadowLayer(4f, 0f, 1f, 0xE6000000);
         view.setText(text);
         return view;
     }

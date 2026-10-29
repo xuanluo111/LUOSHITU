@@ -110,6 +110,7 @@ import com.fongmi.android.tv.ui.dialog.ReceiveDialog;
 import com.fongmi.android.tv.ui.dialog.SpeedSettingDialog;
 import com.fongmi.android.tv.ui.dialog.TrackDialog;
 import com.fongmi.android.tv.utils.Clock;
+import com.fongmi.android.tv.utils.ElderText;
 import com.fongmi.android.tv.utils.FileChooser;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.ImgUtil;
@@ -121,6 +122,7 @@ import com.fongmi.android.tv.utils.Timer;
 import com.fongmi.android.tv.utils.Traffic;
 import com.fongmi.android.tv.utils.Util;
 import com.github.catvod.utils.UriUtil;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -155,6 +157,9 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     private boolean externalPlaybackCompleted;
     private boolean useParse;
     private boolean rotate;
+    // 洛视频：详情加载失败的退出弹窗只弹一次，避免超时回调重复触发。
+    private boolean emptyExitShown;
+    private androidx.appcompat.app.AlertDialog emptyExitDialog;
 
     public static void push(FragmentActivity activity, String text) {
         if (TextUtils.isEmpty(text)) return;
@@ -346,6 +351,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.more.setOnClickListener(view -> onMore());
         mBinding.actor.setOnClickListener(view -> onActor());
         mBinding.content.setOnClickListener(view -> onContent());
+        // 洛视频：详情页左上角的返回按钮，点一下直接退出本页回到列表。
+        mBinding.detailBack.setOnClickListener(view -> finish());
         mBinding.reverse.setOnClickListener(view -> onReverse());
         mBinding.director.setOnClickListener(view -> onDirector());
         mBinding.name.setOnLongClickListener(view -> onChange());
@@ -624,6 +631,9 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     public void resetPlaybackForError(String msg) {
         mBinding.swipeLayout.setEnabled(true);
         PlaybackReset.afterError(player(), () -> mClock.setCallback(null));
+        // 洛视频：播放出错后已经没有正在跑的会话了，左上角必须重新长出返回按钮，
+        // 否则老人面对一个空画面只有一个「重试」，连退出都找不到。
+        updateDetailBack();
         // 洛视频：把「怎么办」直接写进提示里。老人不会想到下拉刷新，必须给一个看得见、点得到的入口。
         showError(msg + "，点这里重试");
     }
@@ -669,8 +679,13 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     public void startPlayback(Result result, boolean useParse, long startPositionMs, MediaMetadata metadata) {
         ExternalPlayback.apply(result, getIntent());
         startPositionMs = ExternalPlayback.takePosition(getIntent(), startPositionMs);
-        if (startWebPlayback(mBinding.video, result)) return;
+        if (startWebPlayback(mBinding.video, result)) {
+            updateDetailBack();
+            return;
+        }
         startPlayer(getHistoryKey(), result, useParse, getSite().getTimeout(), startPositionMs, metadata);
+        // 洛视频：播放真正开始后左上角交给播放控制条（它自带返回键），详情页的返回按钮让位。
+        updateDetailBack();
     }
 
     @Override
@@ -696,6 +711,11 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     @Override
     public void renderDetail(Vod item, History history) {
         mHistory = history;
+        emptyExitShown = false;
+        // 洛视频：回到详情态（详情重新加载/换源成功）时把左上角返回按钮放回来。
+        updateDetailBack();
+        // 超时后又切换站源成功了，得先把刚才弹的退出提示收回去。
+        if (emptyExitDialog != null && emptyExitDialog.isShowing()) emptyExitDialog.dismiss();
         mBinding.swipeLayout.setRefreshing(false);
         mBinding.progressLayout.showContent();
         renderFallbackName(item.getName());
@@ -859,6 +879,9 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
 
     @Override
     public void finishVod() {
+        // 洛视频：自动换源全部失败时这里原来是直接 finish。老人的感受是：点了「播放」→ 转圈 →
+        // 画面自己跳回首页，既不知道发生了什么，也不知道下一步该干嘛。改成先弹一句人话再退出。
+        if (showEmptyExit()) return;
         finish();
     }
 
@@ -874,6 +897,32 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         showError(getString(R.string.error_detail));
         mBinding.swipeLayout.setEnabled(true);
         mBinding.progressLayout.showEmpty();
+        showEmptyExit();
+    }
+
+    private boolean showEmptyExit() {
+        // 洛视频：详情页加载失败时整页只剩一个空盒子，既没有返回按钮，也没有底部导航，
+        // 老人只能靠手势退出，实际会被困在这一页。这里给一个只有一个大按钮的提示把人送回去。
+        if (isFinishing()) return false;
+        if (emptyExitShown) return emptyExitDialog != null && emptyExitDialog.isShowing();
+        emptyExitShown = true;
+        emptyExitDialog = new MaterialAlertDialogBuilder(this)
+                .setMessage(R.string.error_detail_exit_message)
+                .setPositiveButton(R.string.error_detail_exit_action, (dialog, which) -> finish())
+                .setCancelable(false)
+                .create();
+        // 适老化：Material 弹窗正文/按钮默认只有 14sp，老人看不清也点不准，这里统一放大。
+        emptyExitDialog.setOnShowListener(dialog -> {
+            TextView message = emptyExitDialog.findViewById(androidx.appcompat.R.id.message);
+            if (message != null) message.setTextSize(20);
+            android.widget.Button action = emptyExitDialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
+            if (action != null) {
+                action.setTextSize(22);
+                action.setMinHeight(ResUtil.dp2px(64));
+            }
+        });
+        emptyExitDialog.show();
+        return true;
     }
 
     private void setText(Vod item) {
@@ -881,7 +930,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         setText(mBinding.director, R.string.detail_director, item.getDirector());
         setText(mBinding.actor, R.string.detail_actor, item.getActor());
         setText(mBinding.content, 0, item.getContent());
-        setText(mBinding.remark, 0, item.getRemarks());
+        setText(mBinding.remark, 0, ElderText.remark(item.getRemarks()));
         setOther(mBinding.other, item);
     }
 
@@ -1217,6 +1266,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         if (isFullscreen()) return;
         if (service() == null) return;
         setFullscreen(true);
+        updateDetailBack();
         applyControlTopInset(mStatusBarTop);
         if (isLand() && !player().isPortrait()) setTransition();
         mBinding.video.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
@@ -1255,11 +1305,24 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.episode.postDelayed(() -> mBinding.episode.scrollToPosition(mEpisodeAdapter.getPosition()), 100);
         mBinding.control.heading.setVisibility(View.INVISIBLE);
         mBinding.video.setLayoutParams(mFrameParams);
+        // 洛视频：从全屏退回详情态时，左上角重新交还给返回按钮。
+        updateDetailBack();
         mInput.resetScale();
         refreshSurface();
         App.post(mR3, 2000);
         setRotate(false);
         hideControl();
+    }
+
+    /**
+     * 洛视频：详情页左上角返回按钮的显示规则集中在这一个地方。
+     * 全屏时收起（画面铺满整屏，退出由控制条的返回键负责）；画中画的小窗里也收起（小窗太小，按钮会盖住画面）。
+     * 不按「是否正在播放」判断：实测拉流失败、自动换源卡住时播放会话标志仍是 true，
+     * 按它判断会把返回按钮永久藏起来，老人就又被困在没有出口的页面上了。
+     * 非全屏播放时控制条的返回键也在左上角，两者动作一致（都是离开本页），叠在一起不影响使用。
+     */
+    private void updateDetailBack() {
+        mBinding.detailBack.setVisibility(isFullscreen() || isInPictureInPictureMode() ? View.GONE : View.VISIBLE);
     }
 
     private void setTransition() {
@@ -1288,7 +1351,8 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     private void showError(String text) {
         PlaybackAction.hideSpeedHint(mBinding.widget.message);
         mBinding.widget.error.setVisibility(View.VISIBLE);
-        mBinding.widget.error.setText(text);
+        // 洛视频：错误提示本身可点击重试，文案里直接写出来，老人不用猜。
+        mBinding.widget.error.setText(getString(R.string.error_retry_message, text));
         hideProgress();
     }
 
@@ -1317,7 +1381,9 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         mBinding.control.action.getRoot().setVisibility(isFullscreen() ? View.VISIBLE : View.GONE);
         mBinding.control.right.lock.setVisibility(isFullscreen() ? View.VISIBLE : View.GONE);
         mBinding.control.action.parse.setVisibility(isUseParse() ? View.VISIBLE : View.GONE);
-        mBinding.control.info.setVisibility(player().isEmpty() ? View.GONE : View.VISIBLE);
+        // 洛视频：这个按钮弹出来的是 User-Agent、127.0.0.1 代理地址这类调试信息（实测误触后满屏乱码），
+        // 对看片没有任何帮助，移动端直接收起，别把技术细节甩到老人脸上。
+        mBinding.control.info.setVisibility(View.GONE);
         mBinding.control.cast.setVisibility(player().isEmpty() ? View.GONE : View.VISIBLE);
         mBinding.control.center.setVisibility(isLock() ? View.GONE : View.VISIBLE);
         mBinding.control.bottom.setVisibility(isLock() ? View.GONE : View.VISIBLE);
@@ -1929,11 +1995,14 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         dismissDialogs();
         hideControl();
         hideDanmaku();
+        // 洛视频：小窗只有巴掌大，那个 64dp 的圆形返回按钮会盖掉将近五分之一的画面。
+        updateDetailBack();
     }
 
     private void onExitPictureInPicture() {
         if (!isFullscreen()) setVideoView(false);
         syncDanmakuEnabled();
+        updateDetailBack();
         if (isStop()) finish();
     }
 

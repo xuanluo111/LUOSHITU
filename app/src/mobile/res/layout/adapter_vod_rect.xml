@@ -38,12 +38,14 @@
         tools:text="泥巴"
         tools:visibility="visible" />
 
+    <!-- 洛视频：手机上海报只有约 99dp 宽，「评分：8.9」需要约 85dp，
+         16dp 右边距会把徽标压到省略号截断，评分完全看不见。 -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/remark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/name"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="0dp"
         android:background="@drawable/shape_vod_remark"
         android:singleLine="true"
         android:textColor="@color/text_remark"

@@ -81,4 +81,12 @@
 
     <string name="subtitle_search_api_title">Assrt</string>
 
+    <!-- 洛视频：站点列表弹窗标题，按三个入口分别说清楚这一步在干什么（原先无标题，用户不知道在选什么） -->
+    <string name="dialog_site_title_change">Switch to another source</string>
+    <string name="dialog_site_title_search">Which site to search</string>
+    <string name="dialog_site_title_home">Choose the home site</string>
+
+    <!-- 洛视频：列表空态带上下一步，句子本身就做成重试入口 -->
+    <string name="empty_vod_hint">Nothing here yet. Tap to reload.</string>
+
 </resources>

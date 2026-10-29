@@ -9,4 +9,12 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
+    <!-- 洛视频：按壁纸亮度自动加深的遮罩，alpha 由 CustomWallView 在每次刷新壁纸时算 -->
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0" />
+
 </FrameLayout>

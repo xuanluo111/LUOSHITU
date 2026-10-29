@@ -80,4 +80,12 @@
 
     <string name="subtitle_search_api_title">Assrt</string>
 
+    <!-- 洛視頻：站點列表彈窗標題 -->
+    <string name="dialog_site_title_change">換個源試試</string>
+    <string name="dialog_site_title_search">在哪個站裡找</string>
+    <string name="dialog_site_title_home">選一個首頁站點</string>
+
+    <!-- 洛視頻：列表空態，句子本身就是重試入口 -->
+    <string name="empty_vod_hint">這裡暫時沒有節目\n點一下換一批看看</string>
+
 </resources>

@@ -258,7 +258,11 @@ public final class Download implements AutoCloseable {
         if (Thread.currentThread().isInterrupted() || canceled || paused) throw new InterruptedIOException();
         if (key != null) throw new IOException("Download already in progress");
         try (this) {
-            Call.Factory client = OkHttp.client(120000); // 洛视频：慢网适配，jar 下载读超时 120s（1MB 级 jar 弱网约需 100s）
+            // 洛视频：这里的 timeout 是「两次 socket 读之间最多等多久」，不是下载总时长。
+            // 原来写 120s，结果是服务器 stall（连接还在但不再吐字节）要等满 2 分钟才判死，
+            // 而该源常在 97% 时 stall。实测建议值 30s：合法慢速下载的包间隔远小于此，
+            // 卡住就尽快抛异常交给调用方重试，同样时间里能多试 4 次。
+            Call.Factory client = OkHttp.client(30000);
             call = client.newCall(request(client));
             if (canceled || paused) call.cancel();
             if (cancellation != null) cancellation.throwIfCanceled();

@@ -48,11 +48,26 @@
                 android:layout_height="match_parent"
                 android:visibility="gone" />
 
+            <!-- 洛视频：平板用的就是这个变体，之前改默认布局时这里漏了，
+                 加载层默认可见 + 没有返回按钮，两个问题在平板上都会复现。 -->
             <include
                 android:id="@+id/progress"
                 layout="@layout/view_progress"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- 洛视频：详情页左上角的大返回按钮，起播后由代码隐藏。 -->
+            <ImageView
+                android:id="@+id/detailBack"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/shape_detail_back"
+                android:contentDescription="@string/detail_back"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_control_back" />
 
         </FrameLayout>
 
@@ -221,10 +236,11 @@
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/reverse"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="4dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="12dp"
                             android:src="@drawable/ic_action_reverse"
                             android:visibility="gone"
                             tools:visibility="visible" />
@@ -236,9 +252,10 @@
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/more"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="12dp"
                             android:src="@drawable/ic_action_more"
                             android:visibility="gone"
                             tools:visibility="visible" />

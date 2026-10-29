@@ -32,7 +32,8 @@ public class VodRectHolder extends BaseVodHolder {
         binding.name.setText(ElderText.clean(item.getName()));
         binding.year.setText(item.getYear());
         binding.site.setText(item.getSiteName());
-        binding.remark.setText(item.getRemarks());
+        // 洛视频：「评分：0」是站点没打分时的占位串，挂在海报上会误导老人，统一当没有备注。
+        binding.remark.setText(ElderText.remark(item.getRemarks()));
         binding.site.setVisibility(item.getSiteVisible());
         binding.name.setVisibility(item.getNameVisible());
         binding.year.setVisibility(item.getYearVisible());

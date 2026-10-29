@@ -5,23 +5,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
+    <!-- 洛视频：原来加载态只有一个转圈，站源慢的时候要转几十秒，老人看不出是在等还是卡死。
+         这里在转圈下面补一行大字说明，网速小字仍由代码控制显隐。 -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminate="true"
-        app:indicatorColor="@color/white" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/traffic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:visibility="gone"
-        tools:text="120 KB/s"
-        tools:visibility="visible" />
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            app:indicatorColor="@color/white" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/loading_please_wait"
+            android:textColor="@color/white_80"
+            android:textSize="20sp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/traffic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/white_60"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="120 KB/s"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
 </FrameLayout>

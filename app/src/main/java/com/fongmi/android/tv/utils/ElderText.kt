@@ -24,4 +24,21 @@ object ElderText {
             t == Character.MODIFIER_SYMBOL.toInt() || t == Character.MATH_SYMBOL.toInt() ||
             t == Character.NON_SPACING_MARK.toInt()
     }
+
+    /** 「评分：0」「得分: 0.0分」这类格式 */
+    private val rating = Regex("""^\s*(评分|評分|得分|分数|分數)\s*[:：]\s*([0-9]+(?:\.[0-9]+)?)\s*分?\s*$""")
+
+    /**
+     * 海报/详情展示用的备注清洗：部分站点的 remark 字段塞的是「评分：0」这类没打分的占位内容，
+     * 每张海报都挂一句，老人会真以为这片子评分很差。评为 0 分的评分标签等同于没有备注。
+     * 只影响展示，列表排序与收藏仍用原始字符串。
+     */
+    @JvmStatic
+    fun remark(remark: String?): String {
+        val text = remark?.trim().orEmpty()
+        if (text.isEmpty()) return ""
+        val match = rating.find(text) ?: return text
+        val score = match.groupValues[2].toDoubleOrNull() ?: return text
+        return if (score <= 0.0) "" else text
+    }
 }

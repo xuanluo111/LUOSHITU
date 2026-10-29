@@ -36,7 +36,7 @@ public class SearchAdapter extends BaseDiffAdapter<Vod, SearchAdapter.ViewHolder
         Vod item = getItem(position);
         holder.binding.name.setText(ElderText.clean(item.getName()));
         holder.binding.site.setText(item.getSiteName());
-        holder.binding.remark.setText(item.getRemarks());
+        holder.binding.remark.setText(ElderText.remark(item.getRemarks()));
         holder.binding.site.setVisibility(item.getSiteVisible());
         holder.binding.remark.setVisibility(item.getRemarkVisible());
         holder.binding.getRoot().setOnClickListener(v -> listener.onItemClick(item));

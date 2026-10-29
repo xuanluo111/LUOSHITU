@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 洛视频：直播断网时这里只显示一行 14sp 小字，看不清也没有重试入口。
+         与点播页保持一致：放大到 20sp、做成可点击，点一下就重新加载当前频道。 -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/error"
         android:layout_width="wrap_content"
@@ -12,11 +14,15 @@
         android:layout_gravity="top|center"
         android:layout_marginTop="24dp"
         android:background="@drawable/shape_widget"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="16dp"
         android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textSize="20sp"
         android:visibility="gone"
-        tools:text="@string/error_play_url"
+        tools:text="网络连接失败，点这里重试"
         tools:visibility="visible" />
 
     <com.google.android.material.textview.MaterialTextView

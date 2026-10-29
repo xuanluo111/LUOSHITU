@@ -67,6 +67,15 @@ public class Task {
         return largeExecutor.submit(task);
     }
 
+    /**
+     * 洛视频：不设超时的异步提交。submit* 系列的 timeout 语义是「到点就 cancel(true)」——
+     * 对下载这类有副作用的长时间任务，中断会让收尾逻辑把已下的分片当成垃圾清掉，
+     * 调用方只是不想一直等，不是不想让它下完。用这个提交，等多久由调用方另外控制。
+     */
+    public static <T> Future<T> submitDetached(Callable<T> callable) {
+        return largeExecutor.submit(callable);
+    }
+
     // 洛视频：大任务（如 jar 下载）与小的加载任务共池时，45s 超时预算会把排队时间也算进去，
     // 极端情况下全程耗在队列里 → 从未真正下载却误标失败。largeExecutor 重载避开排队。
     public static <T> ListenableFuture<T> submitLarge(Callable<T> callable, long timeoutMillis) {

@@ -60,20 +60,29 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
 
     /** 洛视频：首页超过这个时间还没拿到结果就结束转圈，给老人一个真实出口 */
     private static final long TIMEOUT_HOME = 25_000;
+    /** 洛视频：面板副标题的两套说法。默认这套是「第一次没打开」，失败那套是「试过了还是不行」。 */
+    private static final String HINT_NETWORK = "先看看家里的 WiFi 或网线，再点下面的重新加载";
+    private static final String HINT_RETRY_FAILED = "刚才试了一次还是打不开，检查一下 WiFi，过一会儿再点重新加载";
 
     private FragmentVodBinding mBinding;
     private SiteViewModel mViewModel;
     private TypeAdapter mAdapter;
     private Result mResult;
+    /** 洛视频：用户已经点过「重新加载」，后续的失败/超时要说「刚才试过了」，不能说成头一回 */
+    private boolean mRetried;
 
     private final Runnable mHomeTimeout = () -> {
         if (mBinding == null) return;
         if (mBinding.progress.getRoot().getVisibility() != View.VISIBLE) return;
-        // 洛视频：以内容可见性为准，而不是 adapter 数量——切换配置失败时旧 adapter 仍有数据，
-        // 但内容区已被 hideContent 隐藏，按数量判断会让兜底失效，转圈永远收不掉。
-        if (mBinding.pager.getVisibility() == View.VISIBLE) return;
+        // 洛视频：以「内容区可见 + 确实有内容」为准，而不是只看 adapter 数量或只看可见性。
+        // 只看可见性：冷启动时 pager 默认就是 VISIBLE（但一条数据也没），兜底会被直接跳掉（实测）；
+        // 只看数量：切换配置失败时旧 adapter 仍有数据，也会误判成「有内容」而不兜底。
+        boolean contentShown = mBinding.pager.getVisibility() == View.VISIBLE && mAdapter != null && mAdapter.getItemCount() > 0;
+        if (contentShown) return;
         hideProgress();
-        showNotReady();
+        // 看门狗超时也要区分「头一回」和「刚试过」：否则老人点完重新加载、转 25 秒，
+        // 又弹回一句一模一样的话，会以为那一下根本没点中。
+        showNotReady(mRetried);
     };
 
     public static VodFragment newInstance() {
@@ -113,6 +122,8 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
         mBinding.top.setOnClickListener(this::onTop);
         mBinding.logo.setOnClickListener(this::onLogo);
         mBinding.link.setOnClickListener(this::onLink);
+        // 洛视频：跑马灯必须 setSelected(true) 才会转，手机上标题被截断时能滚出完整「站点名｜分类名」。
+        mBinding.title.setSelected(true);
         mBinding.title.setOnClickListener(this::onSite);
         mBinding.filter.setOnClickListener(this::onFilter);
         mBinding.filter.setOnLongClickListener(this::onLink);
@@ -252,8 +263,14 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onConfigEvent(ConfigEvent event) {
         if (event.type() == ConfigEvent.Type.VOD) {
-            hideNotReady();
             setLogo();
+            // 洛视频：配置事件到达 ≠ 内容已拉回来。原来这里顺手 hideNotReady()，
+            // 会把刚弹出的「没准备好」出口又收走，用户只剩一个转不完的圈（实测）。
+            if (mAdapter != null && mAdapter.getItemCount() > 0) {
+                hideNotReady();
+                // 内容真回来了，重置重试标记，下次再出问题还是从「头一回」说起
+                mRetried = false;
+            }
         }
     }
 
@@ -290,7 +307,17 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
 
     /** 洛视频 F2 未就绪态：不白屏、不弹英文错误码，给老人一个真实出口 */
     private void showNotReady() {
+        showNotReady(mRetried);
+    }
+
+    /**
+     * 洛视频：retried=true 表示「刚刚重试过，还是不行」。
+     * 之前这两种情况共用一句「家人正在处理」，断网时老人会以为在等家人，白坐半天；
+     * 现在换成「看网络」这种他自己就能动手的事，重试失败再明确告诉他「刚才那下没成」。
+     */
+    private void showNotReady(boolean retried) {
         mBinding.notReady.getRoot().setVisibility(View.VISIBLE);
+        mBinding.notReady.subtitle.setText(retried ? HINT_RETRY_FAILED : HINT_NETWORK);
         mBinding.notReady.goLive.setOnClickListener(v -> ((HomeActivity) requireActivity()).change(1));
         mBinding.notReady.retry.setOnClickListener(v -> retryHome());
     }
@@ -301,6 +328,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
 
     /** 洛视频：配置或首页内容拉取失败/超时后允许手动重试，不用杀进程重进 */
     private void retryHome() {
+        mRetried = true;
         hideNotReady();
         showProgress();
         setTitle();
@@ -311,7 +339,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
                 Notify.show(msg);
                 // 失败必须当场收转圈；mHomeTimeout 会因旧 adapter 仍有数据而拒绝接管
                 hideProgress();
-                showNotReady();
+                showNotReady(true);
             }
         });
     }
@@ -332,7 +360,7 @@ public class VodFragment extends BaseFragment implements ConfigListener, SiteLis
                 Notify.dismiss();
                 // 失败必须当场收转圈；start() 只 hideContent 不清 adapter，mHomeTimeout 拒绝接管
                 hideProgress();
-                showNotReady();
+                showNotReady(true);
             }
         });
     }

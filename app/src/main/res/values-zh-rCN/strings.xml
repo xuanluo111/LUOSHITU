@@ -412,7 +412,19 @@
     <string name="error_video_effect_dolby_vision_passthrough">杜比视界直通不支持画质设置</string>
     <string name="error_play_tvbus">错误代码：<xliff:g name="name">%s</xliff:g></string>
     <string name="error_detail">暂无播放数据</string>
-    <string name="error_empty">这里什麽都没有 👀</string>
+    <string name="error_empty">这里什么都没有 👀</string>
+    <!-- 洛视频：详情页加载失败后只剩空盒子，没有返回入口，给一个只有大按钮的出口。 -->
+    <string name="error_detail_exit_message">这部片子暂时打不开，换个节目看看吧</string>
+    <string name="error_detail_exit_action">回去换个节目</string>
+    <!-- 洛视频：加载页只有一个转圈，老人看不出是在等；补一行大字说明。 -->
+    <string name="loading_please_wait">正在加载，请稍等…</string>
+    <!-- 洛视频：播放错误提示自带出口，老人不用猜该点哪里。 -->
+    <string name="error_retry_message">%1$s，点这里重试</string>
+    <string name="error_network_poor">网络不太好</string>
+    <string name="error_load_timeout">加载太慢了，点这里重试</string>
+    <!-- 洛视频：站源回的技术异常（Unable to resolve host…）直接显示给老人看不懂，这里换成生活化描述。 -->
+    <string name="error_live_config">节目单没加载出来，检查一下网络</string>
+    <string name="detail_back">返回</string>
 
     <!-- Update -->
     <string name="update_version">发现新版本 <xliff:g name="name">%s</xliff:g></string>

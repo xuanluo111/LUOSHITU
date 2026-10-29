@@ -193,13 +193,26 @@ public class VodPlaybackController {
     private void selectFlag(Flag item, boolean force) {
         if (!state.hasFlags()) return;
         Flag selected = resolveFlag(item);
-        if (!force && selected.isSelected()) return;
+        if (!force && selected.isSelected()) {
+            // 洛视频：很多站点的线路只有一条，详情页上就渲染成一个「播放」按钮，而且默认已选中。
+            // 以前这里直接 return，用户（尤其老人）点「播放」毫无反应，以为卡死了，只能去选集里一个个点。
+            // 现在改成：点到已选中的线路 = 直接播当前选中的那一集，名副其实。
+            playSelectedFlag();
+            return;
+        }
         preloader.clear();
         for (Flag flag : state.getFlags()) flag.setSelected(selected);
         host.renderFlagSelection(selected);
         host.renderEpisodes(selected.getEpisodes());
         host.renderQualityVisible(false);
         seamless(selected);
+    }
+
+    private void playSelectedFlag() {
+        // 已经在播同一条线路（播放中点线路面板）不能打扰，否则会把正在看的片子重头拉一遍。
+        if (host.hasPlaybackSession()) return;
+        // 重新发请求是安全的：请求结果按 pending 比对，旧请求的结果会被丢掉。
+        requestSelectedEpisode();
     }
 
     public void selectEpisode(Episode item) {

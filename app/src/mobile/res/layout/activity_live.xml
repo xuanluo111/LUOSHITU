@@ -34,11 +34,14 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
+        <!-- 洛视频：默认必须是 gone。以前这里不写可见性，加载层一创建就盖在画面上，
+             只要有一条路径没走到 showProgress/hideProgress，就永远转圈（断网拉配置就是这种情况）。 -->
         <include
             android:id="@+id/progress"
             layout="@layout/view_progress"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
     </FrameLayout>
 

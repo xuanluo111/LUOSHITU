@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewbinding.ViewBinding;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.fongmi.android.tv.utils.Util;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -82,18 +83,45 @@ public abstract class BaseBottomSheetDialog extends BottomSheetDialogFragment {
         return 0;
     }
 
+    /** 洛视频：返回大于 0 的宽度就覆盖 material 默认的 640dp 上限，0 表示维持原样 */
+    protected int getWidth() {
+        return 0;
+    }
+
     private void setSheet(BottomSheetDialog dialog) {
         FrameLayout sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (sheet == null) return;
-        // 洛视频：material 给 sheet 的 style 带 640dp maxWidth，而外层 FrameLayout 子项默认 start 对齐，
-        // 平板横屏（屏宽 > 640dp）上整块面板靠左、右侧露出窗口背景。显式水平居中，竖屏窄屏不受影响。
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) sheet.getLayoutParams();
-        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        // 洛视频：material 给 sheet 的 style 带 640dp maxWidth，而容器子项默认 start 对齐，
+        // 平板横屏（屏宽 > 640dp）上整块面板靠左、右侧露出窗口背景。所以只把水平方向改成居中。
+        // 竖向 gravity 必须保持 material 默认的 TOP：BottomSheetBehavior 在 onLayoutChild 里按
+        // offsetTopAndBottom(top - savedTop) 定位，一旦父布局用 BOTTOM 先把 sheet 摆到屏幕底部，
+        // behavior 算出的修正量就是 0，面板会停在可视区之外，表现为「点了没反应、面板不显示」。
+        // sheet 的 parent 是 CoordinatorLayout，其 LayoutParams 不能被强转成 FrameLayout.LayoutParams，
+        // 强转会 ClassCastException 崩溃。
+        ViewGroup.LayoutParams params = sheet.getLayoutParams();
+        if (params instanceof CoordinatorLayout.LayoutParams coordinator) {
+            coordinator.gravity = Gravity.CENTER_HORIZONTAL | verticalGravity(coordinator.gravity);
+        } else if (params instanceof FrameLayout.LayoutParams frame) {
+            frame.gravity = Gravity.CENTER_HORIZONTAL | verticalGravity(frame.gravity);
+        }
         sheet.setLayoutParams(params);
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(sheet);
+        // 洛视频：640dp 这个上限是 BottomSheetBehavior.maxWidth 兜的，在 measure 阶段裁剪，
+        // 只改 LayoutParams.width 会被它盖回去（实测面板宽度纹丝不动，必须两个一起改）。
+        int width = getWidth();
+        if (width > 0) {
+            behavior.setMaxWidth(width);
+            params.width = width;
+            sheet.setLayoutParams(params);
+        }
         setHeight(sheet, behavior);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
+    }
+
+    private static int verticalGravity(int gravity) {
+        int vertical = gravity & Gravity.VERTICAL_GRAVITY_MASK;
+        return vertical == Gravity.NO_GRAVITY ? Gravity.TOP : vertical;
     }
 
     private void setHeight(FrameLayout sheet, BottomSheetBehavior<FrameLayout> behavior) {

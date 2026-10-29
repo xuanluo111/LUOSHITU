@@ -4,6 +4,7 @@ package com.fongmi.android.tv.ui.custom;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -41,6 +42,12 @@ public class CustomWallView extends FrameLayout implements DefaultLifecycleObser
 
     private static final int[] WALL_PAPERS = {0, R.drawable.wallpaper_1, R.drawable.wallpaper_2, R.drawable.wallpaper_3, R.drawable.wallpaper_4};
     private static final int[] WALL_COLORS = {0, 0xFF40C090, 0xFF4870E0, 0xFF48B0C0, 0xFF404040};
+    /** 洛视频：壁纸亮度低于这个值不用额外压黑，高于 SCRIM_LIGHT 则压到最重 */
+    private static final float SCRIM_DARK = 0.20f;
+    private static final float SCRIM_LIGHT = 0.45f;
+    /** 深色壁纸也留一点遮罩，避免画面局部亮斑刺眼；最重 0.68 能把纯白壁纸的白字拉回 7:1 */
+    private static final float SCRIM_MIN = 0.08f;
+    private static final float SCRIM_MAX = 0.68f;
     private static final int TYPE_RES = 0;
     private static final int TYPE_GIF = 1;
     private static final int TYPE_VIDEO = 2;
@@ -70,7 +77,9 @@ public class CustomWallView extends FrameLayout implements DefaultLifecycleObser
     private void refresh() {
         stop();
         load();
-        theme();
+        int color = getWallColor();
+        applyScrim(color);
+        theme(color);
     }
 
     private void stop() {
@@ -98,12 +107,32 @@ public class CustomWallView extends FrameLayout implements DefaultLifecycleObser
         else loadImage();
     }
 
-    private void theme() {
-        int newColor = getWallColor();
+    private void theme(int newColor) {
         int oldColor = Setting.getWallColor();
         if (newColor == oldColor) return;
         Setting.putWallColor(newColor);
         if (Setting.getThemeColor() == 0) RefreshEvent.theme();
+    }
+
+    /**
+     * 洛视频：页面上的文字大量写死了白色，壁纸一浅就糊在背景里——青绿纯色壁纸下白字只有 2:1，
+     * 模块管理页整页看不清。改几十个布局的文字色不现实，改成在壁纸和内容之间压一层黑遮罩：
+     * 深色壁纸几乎不动，越亮的壁纸压得越重，白字始终能读。
+     */
+    private void applyScrim(int color) {
+        if (binding == null) return;
+        float ratio = (luminance(color) - SCRIM_DARK) / (SCRIM_LIGHT - SCRIM_DARK);
+        ratio = Math.max(0f, Math.min(1f, ratio));
+        binding.scrim.setAlpha(SCRIM_MIN + (SCRIM_MAX - SCRIM_MIN) * ratio);
+    }
+
+    /** WCAG 的相对亮度（含 sRGB 线性化），用来判断壁纸是深还是浅 */
+    private static float luminance(int color) {
+        return 0.2126f * linear(Color.red(color) / 255f) + 0.7152f * linear(Color.green(color) / 255f) + 0.0722f * linear(Color.blue(color) / 255f);
+    }
+
+    private static float linear(float channel) {
+        return channel <= 0.04045f ? channel / 12.92f : (float) Math.pow((channel + 0.055f) / 1.055f, 2.4f);
     }
 
     private void loadRes(int resId) {
@@ -157,6 +186,8 @@ public class CustomWallView extends FrameLayout implements DefaultLifecycleObser
         if (video != null) return;
         video = (PlayerView) LayoutInflater.from(getContext()).inflate(R.layout.view_wall_video, this, false);
         addView(video, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        // 视频壁纸是后加的，默认会盖在遮罩上面；把遮罩提回来，动态壁纸也一样压暗
+        binding.scrim.bringToFront();
     }
 
     private boolean hasVideo() {

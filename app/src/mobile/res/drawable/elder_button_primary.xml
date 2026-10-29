@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 洛视频适老化主按钮：深蓝底 + 白字（10.9:1），圆角取 elder_corner。
+     帮助页原先用系统 Button，方角灰底跟全站圆角蓝底断层，老人会以为那个按钮不能点。 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#33FFFFFF">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/elder_primary" />
+            <corners android:radius="@dimen/elder_corner" />
+        </shape>
+    </item>
+</ripple>

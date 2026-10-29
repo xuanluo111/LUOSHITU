@@ -2,7 +2,9 @@ package com.fongmi.android.tv.ui.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewbinding.ViewBinding;
 
+import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Product;
+import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Result;
 import com.fongmi.android.tv.bean.Site;
@@ -33,11 +37,22 @@ import java.util.HashMap;
 
 public class TypeFragment extends BaseFragment implements CustomScroller.Callback, VodAdapter.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
+    /** 洛视频：超过这个时间还没拿到结果就结束转圈，不能让老人对着一个永远转的圈 */
+    private static final long TIMEOUT_LOAD = 25_000;
+
     private HashMap<String, String> mExtends;
     private FragmentTypeBinding mBinding;
     private CustomScroller mScroller;
     private SiteViewModel mViewModel;
     private VodAdapter mAdapter;
+
+    private final Runnable mLoadTimeout = () -> {
+        if (mBinding == null || !mBinding.progressLayout.isProgress()) return;
+        // 转圈永远收不掉是实测最常见的「 App 卡死」假象：站源慢时请求可能一直不回来。
+        // 这里把转圈换成看得懂的空态，并把「下一步干什么」写清楚。
+        showEmptyText(R.string.error_load_timeout);
+        mBinding.progressLayout.showEmpty();
+    };
 
     public static TypeFragment newInstance(String key, String typeId, Style style, HashMap<String, String> extend, boolean folder, int y) {
         Bundle args = new Bundle();
@@ -95,7 +110,7 @@ public class TypeFragment extends BaseFragment implements CustomScroller.Callbac
 
     @Override
     protected void initView() {
-        mBinding.progressLayout.showProgress();
+        showProgress();
         mScroller = new CustomScroller(this);
         mExtends = getExtend();
         setRecyclerView();
@@ -133,10 +148,17 @@ public class TypeFragment extends BaseFragment implements CustomScroller.Callbac
     private void getVideo() {
         mScroller.reset();
         mAdapter.clear(() -> {
-            if (!mBinding.swipeLayout.isRefreshing()) mBinding.progressLayout.showProgress();
+            if (!mBinding.swipeLayout.isRefreshing()) showProgress();
             if (isHome()) setAdapter(getParent().getResult());
             else getVideo(getTypeId(), "1");
         });
+    }
+
+    /** 起转圈的同时挂上看门狗，结果回来后由 setAdapter 拆掉 */
+    private void showProgress() {
+        if (mBinding == null) return;
+        mBinding.progressLayout.showProgress();
+        App.post(mLoadTimeout, TIMEOUT_LOAD);
     }
 
     private void getVideo(String typeId, String page) {
@@ -144,12 +166,25 @@ public class TypeFragment extends BaseFragment implements CustomScroller.Callbac
     }
 
     private void setAdapter(Result result) {
+        App.removeCallbacks(mLoadTimeout);
         boolean first = mScroller.first();
         int size = result.getList().size();
+        // 洛视频：站源返回空列表时，原先只有一句「这里什么都没有👀」，没说下一步干什么；
+        // 换成带动作的句子，并且点一下重新拉取。
+        if (first && size == 0) showEmptyText(R.string.empty_vod_hint);
         mBinding.progressLayout.showContent(first, size);
         mBinding.swipeLayout.setRefreshing(false);
         mScroller.endLoading(result);
         if (size > 0) addVideo(result);
+    }
+
+    /** 洛视频：空态文案 + “这句提示本身就是重试按钮”的适老化处理 */
+    private void showEmptyText(int resId) {
+        TextView text = mBinding.progressLayout.findViewById(R.id.text);
+        if (text == null) return;
+        text.setText(resId);
+        // 适老化：下拉刷新是个隐藏手势，老人不会想到，直接把这句提示本身做成重试入口。
+        if (text.getParent() instanceof View empty) empty.setOnClickListener(v -> onRefresh());
     }
 
     private void addVideo(Result result) {

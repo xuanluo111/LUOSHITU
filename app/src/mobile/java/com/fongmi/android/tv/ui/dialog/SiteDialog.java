@@ -50,7 +50,17 @@ public class SiteDialog extends BaseAlertDialog implements SiteAdapter.OnClickLi
 
     @Override
     protected MaterialAlertDialogBuilder getBuilder() {
-        return builder().setView(getBinding().getRoot());
+        return builder().setTitle(getTitleRes()).setView(getBinding().getRoot());
+    }
+
+    /**
+     * 洛视频：原来这个弹窗一个标题都没有，老人点进来只看到一列圆角条，不知道该选什么；
+     * 三个入口的意图不一样，标题跟着入口说话。
+     */
+    private int getTitleRes() {
+        if (search && change) return R.string.dialog_site_title_home;
+        if (search) return R.string.dialog_site_title_search;
+        return R.string.dialog_site_title_change;
     }
 
     @Override
@@ -61,6 +71,9 @@ public class SiteDialog extends BaseAlertDialog implements SiteAdapter.OnClickLi
         binding.recycler.setItemAnimator(null);
         binding.recycler.setHasFixedSize(true);
         binding.recycler.addItemDecoration(new SpaceItemDecoration(1, 8));
+        // 洛视频：站点多时列表按 376dp 钉死，平板横屏上上下各露半截，看着像坏了；
+        // 改成按屏高给一半高度，弹窗稳定落在屏幕中间，也不至于把屏幕盖满。
+        binding.recycler.setMaxHeight(ResUtil.getScreenHeight() / 2);
         binding.recycler.post(() -> binding.recycler.scrollToPosition(VodConfig.getHomeIndex()));
     }
 

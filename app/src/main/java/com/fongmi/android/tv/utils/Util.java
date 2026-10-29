@@ -124,7 +124,9 @@ public class Util {
     }
 
     public static String clean(String text) {
-        if (!text.contains("<")) return text;
+        // 洛视频：原来只在含 "<" 时才过滤，站源简介里只有实体、没有标签的（如“免费分享&nbsp;阿丑原本是…”）
+        // 会把 &nbsp; 原样显示出来，老人看到的是一堆乱码似的符号。含 "&" 时也要走一遍实体解转。
+        if (!text.contains("<") && !text.contains("&")) return text;
         StringBuilder sb = new StringBuilder();
         text = Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY).toString().replace("\u00A0", " ").replace("\u3000", " ");
         for (String line : text.split("\\r?\\n")) sb.append(line.trim()).append("\n");

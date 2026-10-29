@@ -10,6 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- 洛视频：右下角的链接 FAB（56dp）悬浮在海报网格上，手机上只有 3 列，
+             最后一行整行被盖住。留出 FAB 的高度让列表滚到底时能完整露出来。 -->
         <com.fongmi.android.tv.ui.custom.CustomRecyclerView
             android:id="@+id/recycler"
             android:layout_width="match_parent"
@@ -18,7 +20,7 @@
             android:clipToPadding="false"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:paddingBottom="8dp"
+            android:paddingBottom="72dp"
             tools:listitem="@layout/adapter_vod_rect" />
 
     </com.fongmi.android.tv.ui.custom.ProgressLayout>

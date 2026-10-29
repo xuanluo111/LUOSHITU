@@ -21,8 +21,10 @@ android {
         applicationId "com.fongmi.android.tv"
         minSdk libs.versions.minSdk.get().toInteger()
         targetSdk libs.versions.targetSdk.get().toInteger()
-        versionCode 583
-        versionName "5.8.3"
+        // 洛视频：S0 决策——重置为自有版本线 1.0.x。基线 5.8.3(583) 不得沿用，
+        // 否则 Updater 按 versionCode 比较会把后续 1.0.x 判为降级，升级链断裂。
+        versionCode 1
+        versionName "1.0.0"
         manifestPlaceholders.runtimeCatalog = providers.gradleProperty('tvRuntimeCatalog').getOrElse('https://github.com/xuanluo111/LUOSHITU/releases/download/module/catalog.json')
         javaCompileOptions {
             annotationProcessorOptions {

@@ -412,6 +412,14 @@
     <string name="error_play_tvbus">Error code: <xliff:g name="name">%s</xliff:g></string>
     <string name="error_detail">No play data</string>
     <string name="error_empty">Nothing here 👀</string>
+    <string name="error_detail_exit_message">This title cannot be opened right now. Try another one.</string>
+    <string name="error_detail_exit_action">Back to browsing</string>
+    <string name="loading_please_wait">Loading, please wait…</string>
+    <string name="error_retry_message">%1$s. Tap to retry</string>
+    <string name="error_network_poor">Poor network connection</string>
+    <string name="error_load_timeout">Loading is too slow. Tap here to retry.</string>
+    <string name="error_live_config">Channel list did not load. Please check your network</string>
+    <string name="detail_back">Back</string>
 
     <!-- Update -->
     <string name="update_version">New version <xliff:g name="name">%s</xliff:g></string>
